@@ -1,0 +1,736 @@
+<div class="card">
+    <p-toast></p-toast>
+    <p-toolbar>
+
+        <div class="p-toolbar-group-start">
+            <h6>1.0 Excavation</h6>
+        </div>
+
+        <div class="p-toolbar-group-end">
+            <!-- <button pButton pRipple icon="pi pi-copy" class="p-button-rounded m-2"></button> -->
+            <button pButton size="small" icon="pi pi-trash" (click)="deleteRecord()" severity="danger"
+                class="m-2"></button>
+            <button pButton icon="pi pi-print" size="small" class="m-2 "></button>
+            <button pButton label="Export" size="small" (click)="exportExcel()" icon="pi pi-download"
+                class="m-2"></button>
+        </div>
+    </p-toolbar>
+
+    <div class="text-center">
+        <div class="row justify-content-center fs-6 fw-bold">
+            <div class="col-2 col-sm-4 border">
+                Total Value:
+            </div>
+            <div class="col-2 col-sm-4 border">
+                {{totalValue | currency }}
+            </div>
+            <div class="col-2 col-sm-4 border">
+                Currency
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-toast></p-toast>
+
+<p-table [value]="mainItemsRecords |search:searchKey" dataKey="executionOrderMainCode" [resizableColumns]="true"
+    editMode="row" selectionMode="multiple" [(selection)]="selectedExecutionOrder" [rowHover]="true" [rows]="10"
+    [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [loading]="loading" [paginator]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [filterDelay]="0">
+
+    <ng-template pTemplate="caption">
+        <div class="flex flex-wrap justify-content-between gap-2">
+            <div class="border border-primary rounded">
+                <div fd-form-item>
+                    <fd-input-group type="search" glyph="search" glyphAriaLabel="Search" placeholder="Search..."
+                        [button]="true" [disabled]="false" [(ngModel)]="searchKey">
+                    </fd-input-group>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="min-width: 10rem;">
+                <!-- <p-checkbox (onChange)="onSelectAllRecords($event)" [value]="invoicesRecords"></p-checkbox> -->
+            </th>
+            <th style="min-width: 10rem;">Print </th>
+            <th style="min-width: 10rem;"> MainItem.No </th>
+            <th style="min-width: 10rem;">ServiceNO.</th>
+            <th style="min-width: 10rem;">Description</th>
+            <th style="min-width: 10rem;">Quantity</th>
+            <th style="min-width: 10rem;">UOM</th>
+            <th style="min-width: 10rem;">AmountPerUnit</th>
+            <th style="min-width: 10rem;">Currency</th>
+            <th style="min-width: 10rem;">Total</th>
+            <th style="min-width: 10rem;">Actual Quantity</th>
+            <th style="min-width: 10rem;">Actual Percentage %</th>
+            <th style="min-width: 10rem;">OverFulfillment %</th>
+            <th style="min-width: 10rem;">UnlimitedOverFulfillment</th>
+            <th style="min-width: 10rem;">ManualPriceEntryAllowed</th>
+            <th style="min-width: 10rem;"> MaterialGrp</th>
+            <th style="min-width: 10rem;"> ServiceType</th>
+            <th style="min-width: 10rem;">External ServiceNumber</th>
+            <th style="min-width: 10rem;">ServiceText</th>
+            <th style="min-width: 10rem;">LineText</th>
+            <th style="min-width: 10rem;"> Personnel.NR</th>
+            <th style="min-width: 10rem;">LineType</th>
+            <th style="min-width: 10rem;">Line.NR</th>
+            <th style="min-width: 10rem;"> Bidders’ line</th>
+            <th style="min-width: 10rem;">Supplementary Line</th>
+            <th style="min-width: 10rem;">LotCostOne</th>
+            <th style="min-width: 10rem;">Actions</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-mainItem let-editing="editing" let-ri="rowIndex">
+        <tr [pEditableRow]="mainItem">
+
+            <td style="min-width: 10rem;">
+                <p-tableCheckbox [value]="mainItem" />
+                <!-- <p-checkbox [value]="mainItem" [(ngModel)]="mainItem.selected"
+                    (onChange)="onMainItemSelection($event, mainItem)"></p-checkbox> -->
+            </td>
+            <td style="min-width: 10rem;">
+                <p-checkbox [value]="mainItem" [(ngModel)]="mainItem.doNotPrint"
+                    (onChange)="onMainItemSelection($event, mainItem)"></p-checkbox>
+
+            </td>
+            <td style="min-width: 10rem;">
+                {{ rowIndex + ri + 1 }}
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-dropdown [options]="recordsServiceNumber" [(ngModel)]="mainItem.serviceNumberCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="serviceNumberCode"
+                            optionLabel="description" [filter]="true" [filterFields]="['searchTerm','description']"
+                            [showClear]="true" placeholder="Select SeviceNumber" [appendTo]="'body'"
+                            (onChange)="onServiceNumberUpdateChange($event)" [virtualScroll]="true"
+                            [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.searchTerm }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{mainItem.serviceNumberCode}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <ng-container *ngIf="!updateSelectedServiceNumberRecord">
+                            <input pInputText type="text" [(ngModel)]="mainItem.description" class="rounded-input"
+                                pTooltip="{{ mainItem.description }}" tooltipPosition="top" [autoHide]="false">
+                        </ng-container>
+                        <ng-container *ngIf="updateShortTextChangeAllowed && updateSelectedServiceNumberRecord">
+                            <input pInputText type="text" [ngModel]="updateSelectedServiceNumberRecord.description"
+                                class="rounded-input" (ngModelChange)="updateShortText = $event"
+                                pTooltip="{{ mainItem.description }}" tooltipPosition="top" [autoHide]="false">
+                        </ng-container>
+                        <ng-container *ngIf="!updateShortTextChangeAllowed && updateSelectedServiceNumberRecord">
+                            <!-- {{ updateSelectedServiceNumberRecord.description }} -->
+                            <div class="text-ellipsis" [pTooltip]="updateSelectedServiceNumberRecord.description"
+                                tooltipPosition="top" [autoHide]="false">
+                                {{ updateSelectedServiceNumberRecord.description | truncateWords }}
+                            </div>
+                        </ng-container>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <div class="text-container">
+                            <div class="text-ellipsis" pTooltip="{{ mainItem.description }}" tooltipPosition="top"
+                                [autoHide]="false">
+                                {{ mainItem.description | truncateWords}}
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber [min]="0" class="rounded-input" type="number"
+                            [(ngModel)]="mainItem.totalQuantity">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.totalQuantity }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <ng-container *ngIf="updateSelectedServiceNumberRecord">
+                            {{ updateSelectedServiceNumberRecord.baseUnitOfMeasurement }}
+                        </ng-container>
+                        <ng-container *ngIf="!updateSelectedServiceNumberRecord">
+                            <p-dropdown [options]="recordsUnitOfMeasure" [(ngModel)]="mainItem.unitOfMeasurementCode"
+                                [ngModelOptions]="{standalone: true}" optionValue="UnitOfMeasureLongName"
+                                optionLabel="UnitOfMeasureLongName" [filter]="true"
+                                [filterFields]="['UnitOfMeasureLongName','UnitOfMeasureName']" [showClear]="true"
+                                placeholder=`{{mainItem.unitOfMeasurementCode}}` [required]="true" [appendTo]="'body'"
+                                [virtualScroll]="true" [virtualScrollItemSize]="40">
+                                <ng-template let-record pTemplate="item">
+                                    <div class="flex align-items-center gap-2">
+                                        <div>{{ record.UnitOfMeasureLongName }}::{{ record.UnitOfMeasureName }}</div>
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-container>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.unitOfMeasurementCode }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="amountPerUnit" type="number" [min]="0"
+                            [(ngModel)]="mainItem.amountPerUnit">
+
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.amountPerUnit }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                            [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
+                            [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.code }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.currencyCode }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        {{ (mainItem.totalQuantity ?? 0) * (mainItem.amountPerUnit ?? 0) }}
+
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.total }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Actual Quantity -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="actualQuantity" disabled type="number" [min]="0"
+                            [(ngModel)]="mainItem.actualQuantity">
+
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.actualQuantity }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Actual Percentage -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="actualPercentage" disabled type="number"
+                            [min]="0" [(ngModel)]="mainItem.actualPercentage">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.actualPercentage? mainItem.actualPercentage+"%": "" }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- OverFulfillment -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="overFulfillmentPercentage" type="number"
+                            [min]="0" [(ngModel)]="mainItem.overFulfillmentPercentage">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.overFulfillmentPercentage }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Unlimited OverFulfillment -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="unlimitedOverFulfillment" type="checkbox"
+                            [(ngModel)]="mainItem.unlimitedOverFulfillment">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.unlimitedOverFulfillment }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Manual Price Entry Allowed -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText class="rounded-input" name="manualPriceEntryAllowed" type="checkbox"
+                            [(ngModel)]="mainItem.manualPriceEntryAllowed">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.manualPriceEntryAllowed }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Material Grp -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <ng-container *ngIf="updateSelectedServiceNumberRecord">
+                            {{ updateSelectedServiceNumberRecord.materialGroupCode }}
+                        </ng-container>
+                        <ng-container *ngIf="!updateSelectedServiceNumberRecord">
+                            <p-dropdown [options]="recordsMaterialGroup" [(ngModel)]="mainItem.materialGroupCode"
+                                [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code"
+                                [filter]="true" [filterFields]="['code','description']" [showClear]="true"
+                                [virtualScroll]="true" [virtualScrollItemSize]="40"
+                                placeholder=`{{mainItem.materialGroupCode}}` [appendTo]="'body'">
+                                <ng-template let-record pTemplate="item">
+                                    <div class="flex align-items-center gap-2">
+                                        <div>{{ record.code }}::{{ record.description }}</div>
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-container>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{mainItem.materialGroupCode }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Service Type will change to its attribute -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <ng-container *ngIf="updateSelectedServiceNumberRecord">
+                            {{ updateSelectedServiceNumberRecord.serviceTypeCode}}
+                        </ng-container>
+                        <ng-container *ngIf="!updateSelectedServiceNumberRecord">
+                            <p-dropdown [options]="recordsServiceType" [(ngModel)]="mainItem.serviceTypeCode"
+                                [ngModelOptions]="{standalone: true}" optionValue="serviceId" optionLabel="serviceId"
+                                [filter]="true" [filterFields]="['serviceId','description']" [showClear]="true"
+                                [virtualScroll]="true" [virtualScrollItemSize]="40"
+                                placeholder=`{{mainItem.serviceTypeCode}}` [appendTo]="'body'">
+                                <ng-template let-record pTemplate="item">
+                                    <div class="flex align-items-center gap-2">
+                                        <div>{{ record.serviceId }}::{{ record.description }}</div>
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-container>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{mainItem.serviceTypeCode }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- External Service Number -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText class="rounded-input" name="externalServiceNumber" type="text"
+                            [(ngModel)]="mainItem.externalServiceNumber" pTooltip="{{ mainItem.externalServiceNumber }}"
+                            tooltipPosition="top" [autoHide]="false">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <div class="text-container">
+                            <div class="text-ellipsis" pTooltip="{{ mainItem.externalServiceNumber }}"
+                                tooltipPosition="top" [autoHide]="false">
+                                {{ mainItem.externalServiceNumber | truncateWords}}
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Service Text -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText class="rounded-input" name="serviceText" type="text"
+                            [(ngModel)]="mainItem.serviceText" pTooltip="{{ mainItem.serviceText }}"
+                            tooltipPosition="top" [autoHide]="false">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <div class="text-container">
+                            <div class="text-ellipsis" pTooltip="{{ mainItem.serviceText }}" tooltipPosition="top"
+                                [autoHide]="false">
+                                {{ mainItem.serviceText | truncateWords}}
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!--  Line Text -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText class="rounded-input" name="lineText" type="text"
+                            [(ngModel)]="mainItem.lineText" pTooltip="{{ mainItem.lineText }}" tooltipPosition="top"
+                            [autoHide]="false">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <div class="text-container">
+                            <div class="text-ellipsis" pTooltip="{{ mainItem.lineText }}" tooltipPosition="top"
+                                [autoHide]="false">
+                                {{ mainItem.lineText | truncateWords}}
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Personnel Number -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputText class="rounded-input" name="personnelNumberCode" type="text"
+                            [(ngModel)]="mainItem.personnelNumberCode" pTooltip="{{ mainItem.personnelNumberCode }}"
+                            tooltipPosition="top" [autoHide]="false">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <div class="text-container">
+                            <div class="text-ellipsis" pTooltip="{{ mainItem.personnelNumberCode }}"
+                                tooltipPosition="top" [autoHide]="false">
+                                {{ mainItem.personnelNumberCode | truncateWords}}
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Line Type -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-dropdown [options]="recordsLineType" [(ngModel)]="mainItem.lineTypeCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                            [filterFields]="['code','description']" [showClear]="true" placeholder="Select LineType"
+                            [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.code }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.lineTypeCode }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Line Number -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="lineNumber" type="text"
+                            [(ngModel)]="mainItem.lineNumber">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.lineNumber }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <!-- Bidders Line -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input name="biddersLine" class="rounded-input" [(ngModel)]="mainItem.biddersLine"
+                            type="checkbox">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.biddersLine }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!--  Supplementary Line  -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input name="supplementaryLine" class="rounded-input" [(ngModel)]="mainItem.supplementaryLine"
+                            type="checkbox">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.supplementaryLine }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Lot Cost One -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input name="lotCostOne" class="rounded-input" [(ngModel)]="mainItem.lotCostOne"
+                            type="checkbox">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.lotCostOne }}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <div class="flex align-items-center justify-content-center gap-2">
+                    <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil"
+                        (click)="onMainItemEditInit(mainItem)" class="p-button-rounded p-button-text"></button>
+                    <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check"
+                        (click)="onMainItemEditSave(mainItem.executionOrderMainCode,mainItem)"
+                        class="p-button-rounded p-button-text p-button-success mr-2"></button>
+                    <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times"
+                        (click)="onMainItemEditCancel(mainItem, ri)"
+                        class="p-button-rounded p-button-text p-button-danger"></button>
+                </div>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="footer" class="m-3">
+        <tr>
+            <td style="min-width: 10rem;">
+            </td>
+            <td style="min-width: 10rem;">
+            </td>
+            <td style="min-width: 10rem;">
+            </td>
+            <td style="min-width: 10rem;">
+                <p-dropdown [options]="recordsServiceNumber" [(ngModel)]="selectedServiceNumber"
+                    [ngModelOptions]="{standalone: true}" optionValue="serviceNumberCode" optionLabel="description"
+                    [filter]="true" [filterFields]="['searchTerm','description']" [showClear]="true"
+                    placeholder="Select SeviceNumber" (onChange)="onServiceNumberChange($event)" [appendTo]="'body'"
+                    [virtualScroll]="true" [virtualScrollItemSize]="40">
+                    <ng-template let-record pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ record.searchTerm }}::{{ record.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </td>
+            <td style="min-width: 10rem;">
+                <ng-container *ngIf="!selectedServiceNumberRecord">
+                    <input pInputText name="description" type="text" [(ngModel)]="newMainItem.description"
+                        pTooltip="{{ newMainItem.description }}" tooltipPosition="top" [autoHide]="false"
+                        class="rounded-input">
+                </ng-container>
+                <ng-container *ngIf="shortTextChangeAllowed && selectedServiceNumberRecord">
+                    <input pInputText type="text" [(ngModel)]="selectedServiceNumberRecord.description"
+                        class="rounded-input" (ngModelChange)="shortText = $event"
+                        pTooltip="{{ newMainItem.description }}" tooltipPosition="top" [autoHide]="false">
+                </ng-container>
+                <ng-container *ngIf="!shortTextChangeAllowed && selectedServiceNumberRecord">
+                    <div class="text-ellipsis" [pTooltip]="selectedServiceNumberRecord.description"
+                        tooltipPosition="top" [autoHide]="false">
+                        {{ selectedServiceNumberRecord.description | truncateWords }}
+                    </div>
+                </ng-container>
+            </td>
+
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="totalQuantity" type="number" [min]="0" [(ngModel)]="newMainItem.totalQuantity"
+                    class="rounded-input">
+            </td>
+
+            <td style="min-width: 10rem;">
+                <ng-container *ngIf="selectedServiceNumberRecord">
+                    {{selectedServiceNumberRecord.baseUnitOfMeasurement}}
+                </ng-container>
+                <ng-container *ngIf="!selectedServiceNumberRecord">
+                    <p-dropdown [options]="recordsUnitOfMeasure" [(ngModel)]="selectedUnitOfMeasure"
+                        [ngModelOptions]="{standalone: true}" optionValue="UnitOfMeasureLongName"
+                        optionLabel="UnitOfMeasureLongName" [filter]="true"
+                        [filterFields]="['UnitOfMeasureLongName','UnitOfMeasureName']" [showClear]="true"
+                        placeholder="Select UnitOfMeasure" [required]="true" [appendTo]="'body'" [virtualScroll]="true"
+                        [virtualScrollItemSize]="40">
+                        <ng-template let-record pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ record.UnitOfMeasureLongName }}::{{ record.UnitOfMeasureName }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </ng-container>
+            </td>
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="amountPerUnit" type="number" [min]="0" [(ngModel)]="newMainItem.amountPerUnit"
+                    class="rounded-input">
+            </td>
+            <td style="min-width: 10rem;">
+                <p-dropdown [options]="recordsCurrency" [(ngModel)]="selectedCurrency"
+                    [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                    [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
+                    [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                    <ng-template let-record pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ record.code }}::{{ record.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+
+            </td>
+            <td style="min-width: 10rem;">
+                {{ (newMainItem.totalQuantity ?? 0) * (newMainItem.amountPerUnit ?? 0) }}
+                <!-- <input pInputNumber name="total" type="number" [min]="0" [(ngModel)]="newMainItem.total"> -->
+            </td>
+            <!-- Actual Quantity -->
+            <td style="min-width: 10rem;">
+                <!-- <input pInputNumber name="actualQuantity" type="number" [min]="0"
+                    [(ngModel)]="newMainItem.actualQuantity"> -->
+            </td>
+            <!-- Actual Percentage -->
+            <td style="min-width: 10rem;">
+                <!-- <input pInputNumber name="actualPercentage" type="number" [min]="0"
+                    [(ngModel)]="newMainItem.actualPercentage"> -->
+            </td>
+            <!-- OverFulfillment -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="overFulfillmentPercentage" type="number" [min]="0"
+                    [(ngModel)]="newMainItem.overFulfillmentPercentage" class="rounded-input">
+            </td>
+            <!-- Unlimited OverFulfillment -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="unlimitedOverFulfillment" type="checkbox"
+                    [(ngModel)]="newMainItem.unlimitedOverFulfillment" class="rounded-input">
+            </td>
+            <!-- Manual Price Entry Allowed -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="manualPriceEntryAllowed" type="checkbox"
+                    [(ngModel)]="newMainItem.manualPriceEntryAllowed" class="rounded-input">
+            </td>
+            <!-- Material Grp -->
+            <td style="min-width: 10rem;">
+                <ng-container *ngIf="selectedServiceNumberRecord">
+                    {{ selectedServiceNumberRecord.materialGroupCode }}
+                </ng-container>
+                <ng-container *ngIf="!selectedServiceNumberRecord">
+                    <p-dropdown [options]="recordsMaterialGroup" [(ngModel)]="selectedMaterialGroup"
+                        [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                        [filterFields]="['code','description']" [showClear]="true" placeholder="Select MaterialGrp"
+                        [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                        <ng-template let-record pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ record.code }}::{{ record.description }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </ng-container>
+            </td>
+            <!-- Service Type  -->
+            <td style="min-width: 10rem;">
+                <ng-container *ngIf="selectedServiceNumberRecord">
+                    {{ selectedServiceNumberRecord.serviceTypeCode }}
+                </ng-container>
+                <ng-container *ngIf="!selectedServiceNumberRecord">
+                    <p-dropdown [options]="recordsServiceType" [(ngModel)]="selectedServiceType"
+                        [ngModelOptions]="{standalone: true}" optionValue="serviceId" optionLabel="serviceId"
+                        [filter]="true" [filterFields]="['serviceId','description']" [showClear]="true"
+                        placeholder="Select ServiceType" [appendTo]="'body'" [virtualScroll]="true"
+                        [virtualScrollItemSize]="40">
+                        <ng-template let-record pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ record.serviceId }}::{{ record.description }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </ng-container>
+            </td>
+            <!-- External Service Number -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="externalServiceNumber" type="text"
+                    [(ngModel)]="newMainItem.externalServiceNumber" class="rounded-input"
+                    pTooltip="{{ newMainItem.externalServiceNumber }}" tooltipPosition="top" [autoHide]="false">
+            </td>
+            <!-- Service Text -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="serviceText" class="rounded-input" type="text"
+                    [(ngModel)]="newMainItem.serviceText" pTooltip="{{ newMainItem.serviceText }}" tooltipPosition="top"
+                    [autoHide]="false">
+
+            </td>
+            <!--  Line Text -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="lineText" class="rounded-input" type="text" [(ngModel)]="newMainItem.lineText"
+                    pTooltip="{{ newMainItem.lineText }}" tooltipPosition="top" [autoHide]="false">
+            </td>
+            <!-- Personnel Number -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="personnelNumberCode" class="rounded-input" type="text"
+                    [(ngModel)]="newMainItem.personnelNumberCode" pTooltip="{{ newMainItem.personnelNumberCode }}"
+                    tooltipPosition="top" [autoHide]="false">
+            </td>
+            <!-- Line Type -->
+            <td style="min-width: 10rem;">
+                <p-dropdown [options]="recordsLineType" [(ngModel)]="selectedLineType"
+                    [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                    [filterFields]="['code','description']" [showClear]="true" placeholder="Select LineType"
+                    [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                    <ng-template let-record pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ record.code }}::{{ record.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </td>
+            <!-- Line Number -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="lineNumber" class="rounded-input" type="text"
+                    [(ngModel)]="newMainItem.lineNumber" pTooltip="{{ newMainItem.lineNumber }}" tooltipPosition="top"
+                    [autoHide]="false">
+            </td>
+            <!-- Bidders Line -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="biddersLine" class="rounded-input" type="checkbox"
+                    [(ngModel)]="newMainItem.biddersLine">
+            </td>
+
+            <!--  Supplementary Line  -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="supplementaryLine" class="rounded-input" type="checkbox"
+                    [(ngModel)]="newMainItem.supplementaryLine">
+            </td>
+
+            <!-- Lot Cost One -->
+            <td style="min-width: 10rem;">
+                <input pInputText name="lotCostOne" class="rounded-input" type="checkbox"
+                    [(ngModel)]="newMainItem.lotCostOne">
+            </td>
+
+            <td style="min-width: 10rem;">
+                <button pButton type="button" icon="pi pi-plus" class="ui-button-info" label="Save MainItem"
+                    (click)="addMainItem()">
+                </button>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="summary">
+        <div class="flex align-items-center justify-content-between">
+            In total there are {{mainItemsRecords ? mainItemsRecords.length : 0 }} MainItem Records.
+        </div>
+    </ng-template>
+
+</p-table>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>

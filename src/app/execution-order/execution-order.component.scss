@@ -1,0 +1,54 @@
+.rounded-input {
+  border-radius: 8px; 
+  border: 1px solid #ccc; 
+  padding: 8px 12px;
+  font-size: 1rem; 
+  outline: none; 
+  transition: border-color 0.3s, box-shadow 0.3s; 
+}
+
+.rounded-input:focus {
+  border-color: #007bff; 
+  box-shadow: 0 0 0 3px rgba(38, 143, 255, 0.25); 
+}
+
+
+
+.scrollable-tooltip {
+  max-width: 300px; 
+  max-height: 150px; 
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  white-space: pre-wrap; 
+}
+
+
+.text-container {
+  display: flex;
+  align-items: center;  
+  overflow: hidden;   
+}
+
+/* Ensure text truncation */
+.text-ellipsis {
+  white-space: nowrap;     
+  overflow: hidden;       
+  text-overflow: ellipsis;  
+  flex: 1;               
+}
+
+
+  
+.p-datatable-head{
+  background-color: blueviolet;
+}
+
+ #pn_id_5-table{
+  background-color: #1f5aba;
+  // thead,th {
+  //   background-color: #1f5aba;
+  //   border: 0.25px solid #d6cccc;
+  //  // #3B82F6
+  //   // border-radius: 5rem;
+  // }
+}
