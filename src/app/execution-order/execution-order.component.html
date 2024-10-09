@@ -57,6 +57,7 @@
             </th>
             <th style="min-width: 10rem;">Print </th>
             <th style="min-width: 10rem;"> MainItem.No </th>
+            <th style="min-width: 10rem;">Line.NR</th>
             <th style="min-width: 10rem;">ServiceNO.</th>
             <th style="min-width: 10rem;">Description</th>
             <th style="min-width: 10rem;">Quantity</th>
@@ -76,7 +77,6 @@
             <th style="min-width: 10rem;">LineText</th>
             <th style="min-width: 10rem;"> Personnel.NR</th>
             <th style="min-width: 10rem;">LineType</th>
-            <th style="min-width: 10rem;">Line.NR</th>
             <th style="min-width: 10rem;"> Bidders’ line</th>
             <th style="min-width: 10rem;">Supplementary Line</th>
             <th style="min-width: 10rem;">LotCostOne</th>
@@ -99,6 +99,18 @@
             </td>
             <td style="min-width: 10rem;">
                 {{ rowIndex + ri + 1 }}
+            </td>
+            <td style="min-width: 10rem;">
+                <!-- Line Number -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <input pInputNumber class="rounded-input" name="lineNumber" type="text"
+                            [(ngModel)]="mainItem.lineNumber">
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{ mainItem.lineNumber }}
+                    </ng-template>
+                </p-cellEditor>
             </td>
             <td style="min-width: 10rem;">
                 <p-cellEditor>
@@ -444,18 +456,7 @@
                 </p-cellEditor>
             </td>
 
-            <td style="min-width: 10rem;">
-                <!-- Line Number -->
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <input pInputNumber class="rounded-input" name="lineNumber" type="text"
-                            [(ngModel)]="mainItem.lineNumber">
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        {{ mainItem.lineNumber }}
-                    </ng-template>
-                </p-cellEditor>
-            </td>
+
 
             <td style="min-width: 10rem;">
                 <!-- Bidders Line -->
@@ -516,6 +517,12 @@
             <td style="min-width: 10rem;">
             </td>
             <td style="min-width: 10rem;">
+            </td>
+            <!-- Line Number -->
+            <td style="min-width: 10rem;">
+                <input pInputNumber name="lineNumber" class="rounded-input" type="text"
+                    [(ngModel)]="newMainItem.lineNumber" pTooltip="{{ newMainItem.lineNumber }}" tooltipPosition="top"
+                    [autoHide]="false">
             </td>
             <td style="min-width: 10rem;">
                 <p-dropdown [options]="recordsServiceNumber" [(ngModel)]="selectedServiceNumber"
@@ -693,12 +700,7 @@
                     </ng-template>
                 </p-dropdown>
             </td>
-            <!-- Line Number -->
-            <td style="min-width: 10rem;">
-                <input pInputNumber name="lineNumber" class="rounded-input" type="text"
-                    [(ngModel)]="newMainItem.lineNumber" pTooltip="{{ newMainItem.lineNumber }}" tooltipPosition="top"
-                    [autoHide]="false">
-            </td>
+
             <!-- Bidders Line -->
             <td style="min-width: 10rem;">
                 <input pInputText name="biddersLine" class="rounded-input" type="checkbox"

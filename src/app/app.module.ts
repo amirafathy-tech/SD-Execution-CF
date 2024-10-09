@@ -42,6 +42,7 @@ import { AlertComponent } from './shared/alert/alert.component';
 import { ExecutionOrderComponent } from './execution-order/execution-order.component';
 import { SearchPipe } from './pipes/search.pipe';
 import { TruncateWordsPipe } from './pipes/truncate-words.pipe';
+import { HomePageComponent } from './home-page/home-page.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { TruncateWordsPipe } from './pipes/truncate-words.pipe';
     ExecutionOrderComponent,
     SearchPipe,
     TruncateWordsPipe,
+    HomePageComponent,
 
   ],
   imports: [

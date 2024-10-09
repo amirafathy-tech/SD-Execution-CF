@@ -29,7 +29,7 @@ export class ExecutionOrderComponent {
   currency: any
   totalValue: number = 0.0
 
-  selectedExecutionOrder:MainItem[]=[]
+  selectedExecutionOrder: MainItem[] = []
   //fields for dropdown lists
   recordsServiceNumber!: ServiceMaster[];
   selectedServiceNumberRecord?: ServiceMaster
@@ -55,7 +55,7 @@ export class ExecutionOrderComponent {
   selectedLineType: string = "Standard line";
 
   recordsCurrency!: any[];
-  selectedCurrency: string="";
+  selectedCurrency: string = "";
   //
   public rowIndex = 0;
 
@@ -63,7 +63,7 @@ export class ExecutionOrderComponent {
 
   constructor(private router: Router, private _ApiService: ApiService, private _ExecutionOrderService: ExecutionOrderService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
 
-  
+
   ngOnInit() {
     this._ApiService.get<ServiceMaster[]>('servicenumbers').subscribe(response => {
       this.recordsServiceNumber = response
@@ -203,19 +203,19 @@ export class ExecutionOrderComponent {
   clonedMainItem: { [s: number]: MainItem } = {};
   onMainItemEditInit(record: MainItem) {
     console.log(record);
-    
+
     this.clonedMainItem[record.executionOrderMainCode] = { ...record };
   }
   onMainItemEditSave(index: number, record: MainItem) {
     console.log(record);
-    const updatedMainItem = this.removePropertiesFrom(record, ['executionOrderMainCode','total']);
+    const updatedMainItem = this.removePropertiesFrom(record, ['executionOrderMainCode', 'total']);
     console.log(updatedMainItem);
     console.log(this.updateSelectedServiceNumber);
 
     if (this.updateSelectedServiceNumberRecord) {
       const newRecord: MainItem = {
-      // ...record, // Copy all properties from the original record
-      ...updatedMainItem,
+        // ...record, // Copy all properties from the original record
+        ...updatedMainItem,
         unitOfMeasurementCode: this.updateSelectedServiceNumberRecord.baseUnitOfMeasurement,
         description: this.updateSelectedServiceNumberRecord.description,
         materialGroupCode: this.updateSelectedServiceNumberRecord.materialGroupCode,
@@ -223,14 +223,14 @@ export class ExecutionOrderComponent {
       };
       console.log(newRecord);
       console.log(newRecord);
-         // Remove properties with empty or default values
-         const filteredRecord = Object.fromEntries(
-          Object.entries(newRecord).filter(([_, value]) => {
-            return value !== '' && value !== 0 && value !== undefined && value !== null;
-          })
-        );
-        console.log(filteredRecord);
-      
+      // Remove properties with empty or default values
+      const filteredRecord = Object.fromEntries(
+        Object.entries(newRecord).filter(([_, value]) => {
+          return value !== '' && value !== 0 && value !== undefined && value !== null;
+        })
+      );
+      console.log(filteredRecord);
+
       this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
         next: (res) => {
           console.log('executionordermain  updated:', res);
@@ -241,18 +241,18 @@ export class ExecutionOrderComponent {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Data' });
         },
         complete: () => {
-          this.updateSelectedServiceNumberRecord=undefined;
+          this.updateSelectedServiceNumberRecord = undefined;
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated successfully ' });
           // this.ngOnInit()
         }
-       
+
       });
     }
 
     if (!this.updateSelectedServiceNumberRecord) {
       console.log(updatedMainItem);
-       // Remove properties with empty or default values
-       const filteredRecord = Object.fromEntries(
+      // Remove properties with empty or default values
+      const filteredRecord = Object.fromEntries(
         Object.entries(updatedMainItem).filter(([_, value]) => {
           return value !== '' && value !== 0 && value !== undefined && value !== null;
         })
@@ -282,7 +282,7 @@ export class ExecutionOrderComponent {
   deleteRecord() {
     console.log("delete");
     console.log(this.selectedExecutionOrder);
-    
+
     if (this.selectedExecutionOrder.length) {
       this.confirmationService.confirm({
         message: 'Are you sure you want to delete the selected record?',
@@ -291,22 +291,38 @@ export class ExecutionOrderComponent {
         accept: () => {
           for (const record of this.selectedExecutionOrder) {
             console.log(record);
-            this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe(response => {
-              console.log('executionordermain deleted :', response);
-              this.totalValue = 0;
-              this.ngOnInit();
-            });
+
+            this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe({
+              next: (res) => {
+                console.log('executionordermain deleted :', res);
+                this.totalValue = 0;
+                this.ngOnInit()
+              }, error: (err) => {
+                console.log(err);
+              },
+              complete: () => {
+                this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
+                this.selectedExecutionOrder=[]
+              }
+            })
+
+            //       this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe(response => {
+            //         console.log('executionordermain deleted :', response);
+            //         this.totalValue = 0;
+            //         this.ngOnInit();
+            //       });
           }
-          this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
-          this.selectedMainItems = []; // Clear the selectedRecords array after deleting all records
+          //     this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
+          //     this.selectedMainItems = []; // Clear the selectedRecords array after deleting all records
         }
       });
     }
   }
 
+
   // For Add new  Main Item
   newMainItem: MainItem = {
-    Type:'',
+    Type: '',
     executionOrderMainCode: 0,
     serviceNumberCode: 0,
     description: "",
@@ -509,7 +525,7 @@ export class ExecutionOrderComponent {
 
   resetNewMainItem() {
     this.newMainItem = {
-      Type:'',
+      Type: '',
       executionOrderMainCode: 0,
       serviceNumberCode: 0,
       description: "",
@@ -541,7 +557,7 @@ export class ExecutionOrderComponent {
       this.selectedUnitOfMeasure = '';
     // this.selectedServiceNumber=0
   }
-  
+
   // Export to excel sheet:
   transformData(data: MainItem[]) {
     const transformed: MainItem[] = []
