@@ -57,7 +57,7 @@ export class LoginComponent implements OnInit {
           localStorage.setItem('token', res.id_token);
           this.authService.loggedInUser.next(user);
           //this.loading = false;
-          this.router.navigate(['/execution-order']);
+          this.router.navigate(['/execution-order-data']);
         },
         error: (error) => {
           console.log(error);

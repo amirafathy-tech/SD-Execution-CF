@@ -22,6 +22,10 @@ import { NavigationExtras, Router } from '@angular/router';
 })
 export class ExecutionOrderComponent {
 
+  //cloud data:
+  documentNumber!:number;
+  itemNumber!:number;
+
   // Pagination:
   loading: boolean = true;
   ///
@@ -61,7 +65,13 @@ export class ExecutionOrderComponent {
 
   mainItemsRecords: MainItem[] = [];
 
-  constructor(private router: Router, private _ApiService: ApiService, private _ExecutionOrderService: ExecutionOrderService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
+  constructor(private router: Router, private _ApiService: ApiService, private _ExecutionOrderService: ExecutionOrderService, private messageService: MessageService, private confirmationService: ConfirmationService) {
+
+    this.documentNumber = this.router.getCurrentNavigation()?.extras.state?.['documentNumber'];
+    this.itemNumber = this.router.getCurrentNavigation()?.extras.state?.['itemNumber'];
+    console.log(this.documentNumber,this.itemNumber);
+    
+   }
 
 
   ngOnInit() {
@@ -231,7 +241,9 @@ export class ExecutionOrderComponent {
       );
       console.log(filteredRecord);
 
-      this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+       this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+      
+      //this._ApiService.update<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/59100002`, filteredRecord).subscribe({
         next: (res) => {
           console.log('executionordermain  updated:', res);
           this.totalValue = 0;
@@ -259,6 +271,8 @@ export class ExecutionOrderComponent {
       );
       console.log(filteredRecord);
       this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+      
+      // this._ApiService.update<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/59100002`, filteredRecord).subscribe({
         next: (res) => {
           console.log('executionordermain  updated:', res);
           this.totalValue = 0;
@@ -387,25 +401,26 @@ export class ExecutionOrderComponent {
         lotCostOne: this.newMainItem.lotCostOne,
         doNotPrint: this.newMainItem.doNotPrint,
       }
-      if (this.newMainItem.totalQuantity === 0 || this.newMainItem.description === "" || this.selectedCurrency === "") {
-        // || this.newMainItem.unitOfMeasurementCode === ""  // till retrieved from cloud correctly
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Description & Quantity & Currency and UnitOfMeasurement are required',
-          life: 3000
-        });
-      }
-      else {
+      // if (this.newMainItem.totalQuantity === 0 || this.newMainItem.description === "" || this.selectedCurrency === "") {
+      //   // || this.newMainItem.unitOfMeasurementCode === ""  // till retrieved from cloud correctly
+      //   this.messageService.add({
+      //     severity: 'error',
+      //     summary: 'Error',
+      //     detail: 'Description & Quantity & Currency and UnitOfMeasurement are required',
+      //     life: 3000
+      //   });
+      // }
+      // else {
         console.log(newRecord);
-        // Remove properties with empty or default values
         const filteredRecord = Object.fromEntries(
           Object.entries(newRecord).filter(([_, value]) => {
             return value !== '' && value !== 0 && value !== undefined && value !== null;
           })
         );
         console.log(filteredRecord);
-        this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe({
+
+        // this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe({
+          this._ApiService.post<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/59100002`, filteredRecord).subscribe({
           next: (res) => {
             console.log('executionordermain created:', res);
             this.totalValue = 0;
@@ -422,19 +437,10 @@ export class ExecutionOrderComponent {
             this.selectedLineType = "";
 
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
-            // this.ngOnInit()
           }
         });
-        // this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe((response: MainItem) => {
-        //   console.log('executionordermain created:', response);
-        //   if (response) {
-        //     this.resetNewMainItem();
-        //   }
-        //   console.log(response);
-        //   this.totalValue = 0;
-        //   this.ngOnInit()
-        // });
-      }
+
+     // } // else close
     }
 
     else if (this.selectedServiceNumberRecord) { // if user select serviceNumber 
@@ -469,25 +475,27 @@ export class ExecutionOrderComponent {
         lotCostOne: this.newMainItem.lotCostOne,
         doNotPrint: this.newMainItem.doNotPrint,
       }
-      if (this.newMainItem.totalQuantity === 0 || this.selectedServiceNumberRecord.description === "" || this.selectedCurrency === "") {
-        // || this.newMainItem.unitOfMeasurementCode === ""  // till retrieved from cloud correctly
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Description & Quantity & Currency and UnitOfMeasurement are required',
-          life: 3000
-        });
-      }
-      else {
+      // if (this.newMainItem.totalQuantity === 0 || this.selectedServiceNumberRecord.description === "" || this.selectedCurrency === "") {
+      //   // || this.newMainItem.unitOfMeasurementCode === ""  // till retrieved from cloud correctly
+      //   this.messageService.add({
+      //     severity: 'error',
+      //     summary: 'Error',
+      //     detail: 'Description & Quantity & Currency and UnitOfMeasurement are required',
+      //     life: 3000
+      //   });
+      // }
+      // else {
         console.log(newRecord);
-        // Remove properties with empty or default values
         const filteredRecord = Object.fromEntries(
           Object.entries(newRecord).filter(([_, value]) => {
             return value !== '' && value !== 0 && value !== undefined && value !== null;
           })
         );
         console.log(filteredRecord);
-        this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe({
+
+        // this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe({
+        
+        this._ApiService.post<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/59100002`, filteredRecord).subscribe({
           next: (res) => {
             console.log('executionordermain created:', res);
             this.totalValue = 0;
@@ -502,24 +510,9 @@ export class ExecutionOrderComponent {
             this.selectedLineType = "";
             this.selectedCurrency = ""
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
-            //this.ngOnInit()
           }
         });
-
-        // this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe((response: MainItem) => {
-        //   console.log('executionordermain created:', response);
-        //   if (response) {
-        //     this.resetNewMainItem();
-        //     this.selectedServiceNumberRecord = undefined;
-        //     this.selectedServiceNumber = 0;
-        //     this.selectedLineType = "";
-        //     this.selectedCurrency = ""
-        //   }
-        //   console.log(response);
-        //   this.totalValue = 0;
-        //   this.ngOnInit()
-        // });
-      }
+      //} // else close
     }
   }
 

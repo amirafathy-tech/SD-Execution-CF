@@ -43,6 +43,7 @@ import { ExecutionOrderComponent } from './execution-order/execution-order.compo
 import { SearchPipe } from './pipes/search.pipe';
 import { TruncateWordsPipe } from './pipes/truncate-words.pipe';
 import { HomePageComponent } from './home-page/home-page.component';
+import { CloudDataComponent } from './cloud-data/cloud-data.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { HomePageComponent } from './home-page/home-page.component';
     SearchPipe,
     TruncateWordsPipe,
     HomePageComponent,
+    CloudDataComponent,
 
   ],
   imports: [

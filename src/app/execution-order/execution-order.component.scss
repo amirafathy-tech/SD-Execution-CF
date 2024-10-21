@@ -1,3 +1,12 @@
+.sticky-header th {
+  position: sticky;
+  top: 0;
+  background: white; /* Or any color matching your design */
+  z-index: 100; /* Ensure it's above other elements */
+}
+
+
+
 .rounded-input {
   border-radius: 8px; 
   border: 1px solid #ccc; 

@@ -33,7 +33,7 @@
 
 <p-toast></p-toast>
 
-<p-table [value]="mainItemsRecords |search:searchKey" dataKey="executionOrderMainCode" [resizableColumns]="true"
+<p-table [value]="mainItemsRecords |search:searchKey" dataKey="executionOrderMainCode"      [resizableColumns]="true"
     editMode="row" selectionMode="multiple" [(selection)]="selectedExecutionOrder" [rowHover]="true" [rows]="10"
     [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [loading]="loading" [paginator]="true"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [filterDelay]="0">
@@ -51,7 +51,8 @@
     </ng-template>
 
     <ng-template pTemplate="header">
-        <tr>
+        <tr >
+            <!-- class="sticky-header" -->
             <th style="min-width: 10rem;">
                 <!-- <p-checkbox (onChange)="onSelectAllRecords($event)" [value]="invoicesRecords"></p-checkbox> -->
             </th>
