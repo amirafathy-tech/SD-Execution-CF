@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NavigationExtras, Router } from '@angular/router';
+import { ApiService } from '../shared/ApiService.service';
 
 @Component({
   selector: 'app-cloud-data',
@@ -17,17 +18,26 @@ export class CloudDataComponent {
     };
   }
 
+
   cloudData: FormGroup = new FormGroup({
     document: new FormControl(null, [Validators.required, this.nonNegativeValidator()]),
     item: new FormControl(null, [Validators.required, this.nonNegativeValidator()])
   });
 
-  constructor(private router: Router) {
+  customerId!:number;
+
+  constructor(private router: Router,private _ApiService: ApiService,) {
   }
+  
 
   nextPage(cloudData: FormGroup) {
 
     console.log(cloudData.value);
+    // after ensuring entering documentNumber and itemNumber --> call get request with IDs to return customerId . then send it in navigationExtras
+    // this._ApiService.get<any[]>('currencies').subscribe(response => {
+    //   this.customerId = response;
+    // });
+
 
        const navigationExtras: NavigationExtras = {
         state: {
