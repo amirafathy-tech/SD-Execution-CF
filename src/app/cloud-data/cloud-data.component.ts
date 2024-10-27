@@ -34,15 +34,18 @@ export class CloudDataComponent {
 
     console.log(cloudData.value);
     // after ensuring entering documentNumber and itemNumber --> call get request with IDs to return customerId . then send it in navigationExtras
-    // this._ApiService.get<any[]>('currencies').subscribe(response => {
-    //   this.customerId = response;
-    // });
+    this._ApiService.get<any>(`executionordermain/${cloudData.value.document}/${cloudData.value.item}`).subscribe(response => {
+      console.log(response);
+      console.log(response.d.SoldToParty);    
+      this.customerId=response.d.SoldToParty
+    });
 
 
        const navigationExtras: NavigationExtras = {
         state: {
          documentNumber:cloudData.value.document,
          itemNumber:cloudData.value.item,
+         customerId:this.customerId
         }
       };
       console.log(navigationExtras);

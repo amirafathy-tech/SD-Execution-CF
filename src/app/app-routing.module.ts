@@ -9,8 +9,8 @@ import { CloudDataComponent } from './cloud-data/cloud-data.component';
 
 
 const routes: Routes = [
-  // { path: '', component: AppComponent },
-  { path: '', redirectTo: '/home', pathMatch: 'full' }, 
+ { path: '', component: HomePageComponent },
+  // { path: '', redirectTo: '/home', pathMatch: 'full' }, 
   { path: 'home', component: HomePageComponent },
   { path: 'login', component: AuthComponent },
   { path: 'execution-order',canActivate:[AuthGuard], component: ExecutionOrderComponent },

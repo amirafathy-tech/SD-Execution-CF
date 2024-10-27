@@ -25,6 +25,7 @@ export class ExecutionOrderComponent {
   //cloud data:
   documentNumber!:number;
   itemNumber!:number;
+  customerId!:number;
 
   // Pagination:
   loading: boolean = true;
@@ -69,7 +70,8 @@ export class ExecutionOrderComponent {
 
     this.documentNumber = this.router.getCurrentNavigation()?.extras.state?.['documentNumber'];
     this.itemNumber = this.router.getCurrentNavigation()?.extras.state?.['itemNumber'];
-    console.log(this.documentNumber,this.itemNumber);
+    this.customerId= this.router.getCurrentNavigation()?.extras.state?.['customerId'];
+    console.log(this.documentNumber,this.itemNumber,this.customerId);
     
    }
 
@@ -91,7 +93,8 @@ export class ExecutionOrderComponent {
     this._ApiService.get<any[]>('currencies').subscribe(response => {
       this.recordsCurrency = response;
     });
-    this._ApiService.get<MainItem[]>('executionordermain').subscribe(response => {
+    //${this.documentNumber}/${this.itemNumber}
+    this._ApiService.get<MainItem[]>(`executionordermain`).subscribe(response => {
       this.mainItemsRecords = response.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
       console.log(this.mainItemsRecords);
       this.loading = false;
@@ -420,7 +423,7 @@ export class ExecutionOrderComponent {
         console.log(filteredRecord);
 
         // this._ApiService.post<MainItem>('executionordermain', filteredRecord).subscribe({
-          this._ApiService.post<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/59100002`, filteredRecord).subscribe({
+          this._ApiService.post<MainItem>(`executionordermain/${this.documentNumber}/${this.itemNumber}/${this.customerId}`, filteredRecord).subscribe({
           next: (res) => {
             console.log('executionordermain created:', res);
             this.totalValue = 0;
