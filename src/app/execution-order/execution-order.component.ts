@@ -94,15 +94,26 @@ export class ExecutionOrderComponent {
       this.recordsCurrency = response;
     });
     //${this.documentNumber}/${this.itemNumber}
-    this._ApiService.get<MainItem[]>(`executionordermain`).subscribe(response => {
-      this.mainItemsRecords = response.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
-      console.log(this.mainItemsRecords);
-      this.loading = false;
-
-      const filteredRecords = this.mainItemsRecords.filter(record => record.lineTypeCode != "Contingency line");
-
-      this.totalValue = filteredRecords.reduce((sum, record) => sum + record.total, 0);
-      console.log('Total Value:', this.totalValue);
+    this._ApiService.get<MainItem[]>(`executionordermain/${this.documentNumber}`).subscribe({
+      next: (res) => {
+        this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
+          console.log(this.mainItemsRecords);
+         this.loading = false;
+          const filteredRecords = this.mainItemsRecords.filter(record => record.lineTypeCode != "Contingency line");
+          this.totalValue = filteredRecords.reduce((sum, record) => sum + record.total, 0);
+         console.log('Total Value:', this.totalValue);
+      }, error: (err) => {
+        console.log(err);
+        console.log(err.status);
+        if(err.status == 404){
+          this.mainItemsRecords=[];
+          this.loading = false;
+          this.totalValue = this.mainItemsRecords.reduce((sum, record) => sum + record.total, 0);
+          console.log('Total Value:', this.totalValue);
+        }
+      },
+      complete: () => {
+      }
     });
   }
   // Helper Functions:
