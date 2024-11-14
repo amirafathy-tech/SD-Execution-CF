@@ -94,7 +94,7 @@ export class ExecutionOrderComponent {
       this.recordsCurrency = response;
     });
     //${this.documentNumber}/${this.itemNumber}
-    this._ApiService.get<MainItem[]>(`executionordermain/${this.documentNumber}`).subscribe({
+    this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}`).subscribe({
       next: (res) => {
         this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
           console.log(this.mainItemsRecords);
