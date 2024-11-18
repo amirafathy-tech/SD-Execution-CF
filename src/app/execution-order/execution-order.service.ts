@@ -6,6 +6,22 @@ import { MainItem } from './execution-order.model';
 @Injectable()
 export class ExecutionOrderService {
 
+
+
+  private mainItems: MainItem[] = [];
+
+  // Add a new MainItem
+  addMainItem(item: MainItem) {
+    item.executionOrderMainCode = this.mainItems.length + 1;
+    this.mainItems.push(item);
+    console.log(this.mainItems);
+  }
+
+   // Retrieve all MainItems
+   getMainItems(): MainItem[] {
+    return this.mainItems;
+  }
+
     recordsChanged = new Subject<MainItem[]>();
     startedEditing = new Subject<number>();
     constructor(private apiService: ApiService) { }

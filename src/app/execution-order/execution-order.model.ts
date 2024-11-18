@@ -29,8 +29,6 @@ export class MainItem {
     serviceText?:string;
     lineText?: string;
     lineNumber?:string;
-
-
     biddersLine?:boolean;
     supplementaryLine?:boolean;
     lotCostOne?:boolean;
