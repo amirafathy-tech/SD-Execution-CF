@@ -35,6 +35,9 @@ export class MainItem {
     doNotPrint?:boolean;
 
     selected?: boolean;
+  
+    totalHeader?:number;
+
     //executionOrdersubList?:SubItem[];
     
 }
