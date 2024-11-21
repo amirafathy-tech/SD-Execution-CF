@@ -29,6 +29,8 @@ export class ExecutionOrderComponent {
   documentNumber!: number;
   itemNumber!: number;
   customerId!: number;
+  referenceSDDocument!:number;
+
   displayTenderingDocumentDialog = false;
 
   selectedSalesQuotations: MainItemSalesQuotation[] = [];
@@ -80,12 +82,24 @@ export class ExecutionOrderComponent {
     this.documentNumber = this.router.getCurrentNavigation()?.extras.state?.['documentNumber'];
     this.itemNumber = this.router.getCurrentNavigation()?.extras.state?.['itemNumber'];
     this.customerId = this.router.getCurrentNavigation()?.extras.state?.['customerId'];
-    console.log(this.documentNumber, this.itemNumber, this.customerId);
+    this.referenceSDDocument = this.router.getCurrentNavigation()?.extras.state?.['referenceSDDocument'];
+    console.log(this.documentNumber, this.itemNumber, this.customerId,this.referenceSDDocument);
 
   }
 
   showSalesQuotationDialog() {
     this.displayTenderingDocumentDialog = true;
+    // localhost:8080/mainitems?referenceId=40000000&salesQuotationItem=10
+    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?referenceId=${this.referenceSDDocument}&salesQuotationItem=10`).subscribe({
+      next: (res) => {
+        this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
+        console.log(this.mainItemsRecords);
+      }, error: (err) => {
+        console.log(err);
+      },
+      complete: () => {
+      }
+    });
   }
 
   openDocumentDialog() {
@@ -204,6 +218,17 @@ export class ExecutionOrderComponent {
   }
 
 
+   // Initial calculation of totalValue (call this when initializing the component)
+   calculateTotalValue(): void {
+    this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
+  }
+
+  // Call this method when the mainItemsRecords array is updated
+  updateTotalValueAfterAction(): void {
+    this.calculateTotalValue();
+    console.log('Updated Total Value:', this.totalValue);
+  }
+
   ngOnInit() {
 
     this._ApiService.get<ServiceMaster[]>('servicenumbers').subscribe(response => {
@@ -250,27 +275,16 @@ export class ExecutionOrderComponent {
       }
     });
 
-    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems/all`).subscribe({
-      next: (res) => {
-        this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
-        console.log(this.mainItemsRecords);
-        // this.loading = false;
-        // const filteredRecords = this.mainItemsRecords.filter(record => record.lineTypeCode != "Contingency line");
-        // this.totalValue = filteredRecords.reduce((sum, record) => sum + record.total, 0);
-        // console.log('Total Value:', this.totalValue);
-      }, error: (err) => {
-        console.log(err);
-        // console.log(err.status);
-        // if (err.status == 404) {
-        //   this.mainItemsRecords = [];
-        //   this.loading = false;
-        //   this.totalValue = this.mainItemsRecords.reduce((sum, record) => sum + record.total, 0);
-        //   console.log('Total Value:', this.totalValue);
-        // }
-      },
-      complete: () => {
-      }
-    });
+    // this._ApiService.get<MainItemSalesQuotation[]>(`mainitems/all`).subscribe({
+    //   next: (res) => {
+    //     this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
+    //     console.log(this.mainItemsRecords);
+    //   }, error: (err) => {
+    //     console.log(err);
+    //   },
+    //   complete: () => {
+    //   }
+    // });
   }
 
 
@@ -569,6 +583,9 @@ export class ExecutionOrderComponent {
             ...newMainItems
           ];
           console.log(this.mainItemsRecords);
+
+          this.updateTotalValueAfterAction();
+
           this.resetNewMainItem();
 
 
@@ -689,6 +706,9 @@ export class ExecutionOrderComponent {
             ...newMainItems
           ];
           console.log(this.mainItemsRecords);
+ 
+          this.updateTotalValueAfterAction();
+
           this.resetNewMainItem();
           this.selectedServiceNumberRecord = undefined;
         }, error: (err) => {

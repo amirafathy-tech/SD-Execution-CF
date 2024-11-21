@@ -25,6 +25,7 @@ export class CloudDataComponent {
   });
 
   customerId!:number;
+  referenceSDDocument!:number;
 
   constructor(private router: Router,private _ApiService: ApiService,) {
   }
@@ -36,15 +37,18 @@ export class CloudDataComponent {
     // after ensuring entering documentNumber and itemNumber --> call get request with IDs to return customerId . then send it in navigationExtras
     this._ApiService.get<any>(`executionordermain/${cloudData.value.document}/${cloudData.value.item}`).subscribe(response => {
       console.log(response);
+     // ReferenceSDDocument
       console.log(response.d.SoldToParty);    
       this.customerId=response.d.SoldToParty;
+      this.referenceSDDocument=response.d.ReferenceSDDocument;
 
       if (this.customerId) {
         const navigationExtras: NavigationExtras = {
           state: {
             documentNumber: cloudData.value.document,
             itemNumber: cloudData.value.item,
-            customerId: this.customerId
+            customerId: this.customerId,
+            referenceSDDocument:this.referenceSDDocument
           }
         };
         console.log(navigationExtras);
