@@ -199,6 +199,9 @@ export class ExecutionOrderComponent {
             ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
             ...newMainItems
           ];
+
+          this.updateTotalValueAfterAction();
+
           console.log(this.mainItemsRecords);
           this.resetNewMainItem();
           const index = this.selectedSalesQuotations.findIndex(item => item.invoiceMainItemCode === mainItem.invoiceMainItemCode);
@@ -246,6 +249,9 @@ export class ExecutionOrderComponent {
     });
     this._ApiService.get<any[]>('currencies').subscribe(response => {
       this.recordsCurrency = response;
+    });
+    this._ApiService.get<any[]>('measurements').subscribe(response => {
+      this.recordsUnitOfMeasure = response;
     });
 
     if (this.savedInMemory) {
@@ -321,53 +327,55 @@ export class ExecutionOrderComponent {
       );
       console.log(filteredRecord);
       //....................
-      const bodyRequest: any = {
-        quantity: newRecord.totalQuantity,
-        amountPerUnit: newRecord.amountPerUnit
-      };
-      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-        next: (res) => {
-          console.log('mainitem with total:', res);
-          newRecord.total = res.totalWithProfit;
-          const mainItemIndex = this.mainItemsRecords.findIndex(item => item.executionOrderMainCode === index);
-          if (mainItemIndex > -1) {
-            console.log(newRecord);
-
-            // Replace the object entirely to ensure Angular detects the change
-            this.mainItemsRecords[mainItemIndex] = {
-              ...this.mainItemsRecords[mainItemIndex],
-              ...newRecord,
-            };
-
-            // Ensure the array itself updates its reference
-            this.mainItemsRecords = [...this.mainItemsRecords];
-          }
-          //this.cdr.detectChanges();
-          console.log(this.mainItemsRecords);
-        }, error: (err) => {
-          console.log(err);
-        },
-        complete: () => {
-        }
-      });
-      ///...................
-
-      // this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+      // const bodyRequest: any = {
+      //   quantity: newRecord.totalQuantity,
+      //   amountPerUnit: newRecord.amountPerUnit
+      // };
+      // this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
       //   next: (res) => {
-      //     console.log('executionordermain  updated:', res);
-      //     this.totalValue = 0;
-      //     this.ngOnInit();
+      //     console.log('mainitem with total:', res);
+      //     newRecord.total = res.totalWithProfit;
+      //     const mainItemIndex = this.mainItemsRecords.findIndex(item => item.executionOrderMainCode === index);
+      //     if (mainItemIndex > -1) {
+      //       console.log(newRecord);
+
+      //       // Replace the object entirely to ensure Angular detects the change
+      //       this.mainItemsRecords[mainItemIndex] = {
+      //         ...this.mainItemsRecords[mainItemIndex],
+      //         ...newRecord,
+      //       };
+
+      //       // Ensure the array itself updates its reference
+      //       this.mainItemsRecords = [...this.mainItemsRecords];
+
+      //       this.updateTotalValueAfterAction();
+      //     }
+      //     //this.cdr.detectChanges();
+      //     console.log(this.mainItemsRecords);
       //   }, error: (err) => {
       //     console.log(err);
-      //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Data' });
       //   },
       //   complete: () => {
-      //     this.updateSelectedServiceNumberRecord = undefined;
-      //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated successfully ' });
-      //     // this.ngOnInit()
       //   }
-
       // });
+      ///...................
+
+      this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+        next: (res) => {
+          console.log('executionordermain  updated:', res);
+          this.totalValue = 0;
+          this.ngOnInit();
+        }, error: (err) => {
+          console.log(err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Data' });
+        },
+        complete: () => {
+          this.updateSelectedServiceNumberRecord = undefined;
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated successfully ' });
+          // this.ngOnInit()
+        }
+
+      });
     }
 
     if (!this.updateSelectedServiceNumberRecord) {
@@ -381,45 +389,47 @@ export class ExecutionOrderComponent {
       console.log(filteredRecord);
 
       //....................
-      const bodyRequest: any = {
-        quantity: updatedMainItem.totalQuantity,
-        amountPerUnit: updatedMainItem.amountPerUnit
-      };
-      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-        next: (res) => {
-          console.log('mainitem with total:', res);
-          updatedMainItem.total = res.totalWithProfit;
-          const mainItemIndex = this.mainItemsRecords.findIndex(item => item.executionOrderMainCode === index);
-          if (mainItemIndex > -1) {
-            console.log(updatedMainItem);
-
-            this.mainItemsRecords[mainItemIndex] = { ...this.mainItemsRecords[mainItemIndex], ...updatedMainItem };
-            // Ensure the array itself updates its reference
-            this.mainItemsRecords = [...this.mainItemsRecords];
-          }
-          // this.cdr.detectChanges();
-          console.log(this.mainItemsRecords);
-        }, error: (err) => {
-          console.log(err);
-        },
-        complete: () => {
-        }
-      });
-      ///...................
-
-      // this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+      // const bodyRequest: any = {
+      //   quantity: updatedMainItem.totalQuantity,
+      //   amountPerUnit: updatedMainItem.amountPerUnit
+      // };
+      // this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
       //   next: (res) => {
-      //     console.log('executionordermain  updated:', res);
-      //     this.totalValue = 0;
-      //     this.ngOnInit()
+      //     console.log('mainitem with total:', res);
+      //     updatedMainItem.total = res.totalWithProfit;
+      //     const mainItemIndex = this.mainItemsRecords.findIndex(item => item.executionOrderMainCode === index);
+      //     if (mainItemIndex > -1) {
+      //       console.log(updatedMainItem);
+
+      //       this.mainItemsRecords[mainItemIndex] = { ...this.mainItemsRecords[mainItemIndex], ...updatedMainItem };
+      //       // Ensure the array itself updates its reference
+      //       this.mainItemsRecords = [...this.mainItemsRecords];
+
+      //       this.updateTotalValueAfterAction();
+      //     }
+      //     // this.cdr.detectChanges();
+      //     console.log(this.mainItemsRecords);
       //   }, error: (err) => {
       //     console.log(err);
-      //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Data' });
       //   },
       //   complete: () => {
-      //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated successfully ' });
       //   }
       // });
+      ///...................
+
+      this._ApiService.patch<MainItem>('executionordermain', record.executionOrderMainCode, filteredRecord).subscribe({
+        next: (res) => {
+          console.log('executionordermain  updated:', res);
+          this.totalValue = 0;
+          this.ngOnInit()
+        }, error: (err) => {
+          console.log(err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Data' });
+        },
+        complete: () => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record updated successfully ' });
+        }
+      });
     }
   }
   onMainItemEditCancel(row: MainItem, index: number) {
@@ -441,23 +451,24 @@ export class ExecutionOrderComponent {
           for (const record of this.selectedExecutionOrder) {
             console.log(record);
 
-            this.mainItemsRecords = this.mainItemsRecords.filter(item => item.executionOrderMainCode !== record.executionOrderMainCode);
-            // this.cdr.detectChanges();
-            console.log(this.mainItemsRecords);
+            // this.mainItemsRecords = this.mainItemsRecords.filter(item => item.executionOrderMainCode !== record.executionOrderMainCode);
+            // this.updateTotalValueAfterAction();
+            // // this.cdr.detectChanges();
+            // console.log(this.mainItemsRecords);
 
-            // this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe({
-            //   next: (res) => {
-            //     console.log('executionordermain deleted :', res);
-            //     this.totalValue = 0;
-            //     this.ngOnInit()
-            //   }, error: (err) => {
-            //     console.log(err);
-            //   },
-            //   complete: () => {
-            //     this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
-            //     this.selectedExecutionOrder=[]
-            //   }
-            // })
+            this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe({
+              next: (res) => {
+                console.log('executionordermain deleted :', res);
+                this.totalValue = 0;
+                this.ngOnInit()
+              }, error: (err) => {
+                console.log(err);
+              },
+              complete: () => {
+                this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
+                this.selectedExecutionOrder=[]
+              }
+            })
           }
         }
       });
@@ -552,73 +563,73 @@ export class ExecutionOrderComponent {
       ) as MainItem;
       console.log(filteredRecord);
       ///,,,,,,,,,,,,,,,,,,,,,,,,
-      const bodyRequest: any = {
-        quantity: newRecord.totalQuantity,
-        amountPerUnit: newRecord.amountPerUnit
-      };
+      // const bodyRequest: any = {
+      //   quantity: newRecord.totalQuantity,
+      //   amountPerUnit: newRecord.amountPerUnit
+      // };
 
-      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-        next: (res) => {
-          console.log('mainitem with total:', res);
-          // this.totalValue = 0;
-          newRecord.total = res.totalWithProfit;
-
-          const filteredRecord = Object.fromEntries(
-            Object.entries(newRecord).filter(([_, value]) => {
-              return value !== '' && value !== 0 && value !== undefined && value !== null;
-            })
-          ) as MainItem;
-          console.log(filteredRecord);
-
-          this._ExecutionOrderService.addMainItem(filteredRecord);
-
-          this.savedInMemory = true;
-          // this.cdr.detectChanges();
-
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
-          console.log(this.mainItemsRecords);
-
-          this.updateTotalValueAfterAction();
-
-          this.resetNewMainItem();
-
-
-
-        }, error: (err) => {
-          console.log(err);
-        },
-        complete: () => {
-        }
-      });
-      //,,,,,,,,,,,,,,,,,,,,,,,,
-
-      //https://trial.cfapps.us10-001.hana.ondemand.com/executionordermain?salesOrder=6&salesOrderItem=10&customerNumber=591001
-
-      //   this._ApiService.post<MainItem>(`executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&customerNumber=${this.customerId}`, filteredRecord).subscribe({
+      // this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
       //   next: (res) => {
-      //     console.log('executionordermain created:', res);
-      //     this.totalValue = 0;
-      //     this.ngOnInit()
+      //     console.log('mainitem with total:', res);
+      //     // this.totalValue = 0;
+      //     newRecord.total = res.totalWithProfit;
+
+      //     const filteredRecord = Object.fromEntries(
+      //       Object.entries(newRecord).filter(([_, value]) => {
+      //         return value !== '' && value !== 0 && value !== undefined && value !== null;
+      //       })
+      //     ) as MainItem;
+      //     console.log(filteredRecord);
+
+      //     this._ExecutionOrderService.addMainItem(filteredRecord);
+
+      //     this.savedInMemory = true;
+      //     // this.cdr.detectChanges();
+
+      //     const newMainItems = this._ExecutionOrderService.getMainItems();
+
+      //     // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+      //     this.mainItemsRecords = [
+      //       ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+      //       ...newMainItems
+      //     ];
+      //     console.log(this.mainItemsRecords);
+
+      //     this.updateTotalValueAfterAction();
+
+      //     this.resetNewMainItem();
+
+
+
       //   }, error: (err) => {
       //     console.log(err);
       //   },
       //   complete: () => {
-      //     this.resetNewMainItem();
-      //     this.selectedUnitOfMeasure = "";
-      //     this.selectedCurrency = "";
-      //     this.selectedMaterialGroup = "";
-      //     this.selectedServiceType = "";
-      //     this.selectedLineType = "";
-
-      //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
       //   }
       // });
+      //,,,,,,,,,,,,,,,,,,,,,,,,
+
+      //https://trial.cfapps.us10-001.hana.ondemand.com/executionordermain?salesOrder=6&salesOrderItem=10&customerNumber=591001
+
+        this._ApiService.post<MainItem>(`executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&customerNumber=${this.customerId}`, filteredRecord).subscribe({
+        next: (res) => {
+          console.log('executionordermain created:', res);
+          this.totalValue = 0;
+          this.ngOnInit()
+        }, error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+          this.resetNewMainItem();
+          this.selectedUnitOfMeasure = "";
+          this.selectedCurrency = "";
+          this.selectedMaterialGroup = "";
+          this.selectedServiceType = "";
+          this.selectedLineType = "";
+
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
+        }
+      });
 
     }
 
@@ -675,67 +686,67 @@ export class ExecutionOrderComponent {
       console.log(filteredRecord);
 
       ///,,,,,,,,,,,,,,,,,,,,,,,,
-      const bodyRequest: any = {
-        quantity: newRecord.totalQuantity,
-        amountPerUnit: newRecord.amountPerUnit
-      };
+      // const bodyRequest: any = {
+      //   quantity: newRecord.totalQuantity,
+      //   amountPerUnit: newRecord.amountPerUnit
+      // };
 
-      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-        next: (res) => {
-          console.log('mainitem with total:', res);
-          // this.totalValue = 0;
-          newRecord.total = res.totalWithProfit;
-
-          const filteredRecord = Object.fromEntries(
-            Object.entries(newRecord).filter(([_, value]) => {
-              return value !== '' && value !== 0 && value !== undefined && value !== null;
-            })
-          ) as MainItem;
-          console.log(filteredRecord);
-
-          this._ExecutionOrderService.addMainItem(filteredRecord);
-
-          this.savedInMemory = true;
-          //this.cdr.detectChanges();
-
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
-          console.log(this.mainItemsRecords);
- 
-          this.updateTotalValueAfterAction();
-
-          this.resetNewMainItem();
-          this.selectedServiceNumberRecord = undefined;
-        }, error: (err) => {
-          console.log(err);
-        },
-        complete: () => {
-        }
-      });
-      ///,,,,,,,,,,,,,,,,,,,,,,,,
-
-      // this._ApiService.post<MainItem>(`executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&customerNumber=${this.customerId}`, filteredRecord).subscribe({
+      // this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
       //   next: (res) => {
-      //     console.log('executionordermain created:', res);
-      //     this.totalValue = 0;
-      //     this.ngOnInit()
+      //     console.log('mainitem with total:', res);
+      //     // this.totalValue = 0;
+      //     newRecord.total = res.totalWithProfit;
+
+      //     const filteredRecord = Object.fromEntries(
+      //       Object.entries(newRecord).filter(([_, value]) => {
+      //         return value !== '' && value !== 0 && value !== undefined && value !== null;
+      //       })
+      //     ) as MainItem;
+      //     console.log(filteredRecord);
+
+      //     this._ExecutionOrderService.addMainItem(filteredRecord);
+
+      //     this.savedInMemory = true;
+      //     //this.cdr.detectChanges();
+
+      //     const newMainItems = this._ExecutionOrderService.getMainItems();
+
+      //     // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+      //     this.mainItemsRecords = [
+      //       ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+      //       ...newMainItems
+      //     ];
+      //     console.log(this.mainItemsRecords);
+ 
+      //     this.updateTotalValueAfterAction();
+
+      //     this.resetNewMainItem();
+      //     this.selectedServiceNumberRecord = undefined;
       //   }, error: (err) => {
       //     console.log(err);
       //   },
       //   complete: () => {
-      //     this.resetNewMainItem();
-      //     this.selectedServiceNumberRecord = undefined;
-      //     //this.selectedServiceNumber = 0;
-      //     this.selectedLineType = "";
-      //     this.selectedCurrency = ""
-      //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
       //   }
       // });
+      ///,,,,,,,,,,,,,,,,,,,,,,,,
+
+      this._ApiService.post<MainItem>(`executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&customerNumber=${this.customerId}`, filteredRecord).subscribe({
+        next: (res) => {
+          console.log('executionordermain created:', res);
+          this.totalValue = 0;
+          this.ngOnInit()
+        }, error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+          this.resetNewMainItem();
+          this.selectedServiceNumberRecord = undefined;
+          //this.selectedServiceNumber = 0;
+          this.selectedLineType = "";
+          this.selectedCurrency = ""
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Record added successfully ' });
+        }
+      });
 
     }
   }
