@@ -37,6 +37,7 @@ export class MainItem {
     selected?: boolean;
   
     totalHeader?:number;
+    salesOrderItemText?:string;
 
     //executionOrdersubList?:SubItem[];
     

@@ -12,10 +12,8 @@ import { MainItem } from './execution-order.model';
 import { MaterialGroup } from '../models/materialGroup.model';
 import { ServiceType } from '../models/serviceType.model';
 import { LineType } from '../models/lineType.model';
-import { NavigationExtras, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { MainItemSalesQuotation } from '../models/sales-quotation.model';
-import { main } from '@popperjs/core';
-
 @Component({
   selector: 'app-execution-order',
   templateUrl: './execution-order.component.html',
@@ -30,6 +28,8 @@ export class ExecutionOrderComponent {
   itemNumber!: number;
   customerId!: number;
   referenceSDDocument!:number;
+  itemText:string="";
+
 
   displayTenderingDocumentDialog = false;
 
@@ -86,157 +86,9 @@ export class ExecutionOrderComponent {
     console.log(this.documentNumber, this.itemNumber, this.customerId,this.referenceSDDocument);
 
   }
-
-  showSalesQuotationDialog() {
-    this.displayTenderingDocumentDialog = true;
-    //https://trial.cfapps.us10-001.hana.ondemand.com/mainitems?salesOrder=146&salesOrderItem=10
-    // localhost:8080/mainitems?referenceId=40000000&salesQuotationItem=10
-    //`mainitems?referenceId=${this.referenceSDDocument}&salesOrderItem=10`
-    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}&salesOrderItem=10`).subscribe({
-      next: (res) => {
-        this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
-        console.log(this.mainItemsRecords);
-      }, error: (err) => {
-        console.log(err);
-      },
-      complete: () => {
-      }
-    });
-  }
-
-  openDocumentDialog() {
-    this.displayTenderingDocumentDialog = true;
-  }
-  saveSelection() {
-    // console.log(this.serviceInvoiceRecords);
-    console.log('Selected items:', this.selectedSalesQuotations);
-    this.displayTenderingDocumentDialog = false;
-  }
-
-  cancelMainItemSalesQuotation(item: any): void {
-    this.selectedSalesQuotations = this.selectedSalesQuotations.filter(i => i !== item);
-  }
-  // for selected sales quotation:
-  saveMainItem(mainItem: MainItemSalesQuotation) {
-    console.log(mainItem);
-    const newRecord: MainItem = {
-      serviceNumberCode: mainItem.serviceNumberCode,
-      unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
-      //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
-      currencyCode: mainItem.currencyCode,
-
-      description: mainItem.description,
-      materialGroupCode: mainItem.materialGroupCode,
-      serviceTypeCode: mainItem.serviceTypeCode,
-      personnelNumberCode: mainItem.personnelNumberCode,
-      lineTypeCode: mainItem.lineTypeCode,
-
-      totalQuantity: mainItem.quantity,
-      amountPerUnit: mainItem.amountPerUnit,
-      total: mainItem.total,
-      actualQuantity: mainItem.actualQuantity,
-      actualPercentage: mainItem.actualPercentage,
-
-      overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
-      unlimitedOverFulfillment: mainItem.unlimitedOverFulfillment,
-      manualPriceEntryAllowed: mainItem.manualPriceEntryAllowed,
-      externalServiceNumber: mainItem.externalServiceNumber,
-      serviceText: mainItem.serviceText,
-      lineText: mainItem.lineText,
-      lineNumber: mainItem.lineNumber,
-
-      biddersLine: mainItem.biddersLine,
-      supplementaryLine: mainItem.supplementaryLine,
-      lotCostOne: mainItem.lotCostOne,
-      doNotPrint: mainItem.doNotPrint,
-      Type: '',
-      executionOrderMainCode: 0
-    }
-    console.log(newRecord);
-    // mainItem.serviceQuantity
-    if (newRecord.totalQuantity === 0) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: ' Quantity is required',
-        life: 3000
-      });
-    }
-    else {
-      console.log(newRecord);
-      //................
-
-
-      const bodyRequest: any = {
-        quantity: newRecord.totalQuantity,
-        //totalQuantity: newRecord.totalQuantity,
-        amountPerUnit: newRecord.amountPerUnit,
-        // executionOrderMainCode: newRecord.executionOrderMainCode
-      };
-      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-        next: (res) => {
-          console.log('mainitem with total:', res);
-          // this.totalValue = 0;
-          newRecord.total = res.total;
-
-          console.log(' Record:', newRecord);
-
-          const filteredRecord = Object.fromEntries(
-            Object.entries(newRecord).filter(([_, value]) => {
-              return value !== '' && value !== 0 && value !== undefined && value !== null;
-            })
-          ) as MainItem;
-          console.log(filteredRecord);
-          this._ExecutionOrderService.addMainItem(filteredRecord);
-
-          this.savedInMemory = true;
-          // this.cdr.detectChanges();
-
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
-
-          this.updateTotalValueAfterAction();
-
-          console.log(this.mainItemsRecords);
-          this.resetNewMainItem();
-          const index = this.selectedSalesQuotations.findIndex(item => item.invoiceMainItemCode === mainItem.invoiceMainItemCode);
-          if (index !== -1) {
-            this.selectedSalesQuotations.splice(index, 1);
-          }
-
-        }, error: (err) => {
-          console.log(err);
-        },
-        complete: () => {
-        }
-      });
-      //................
-
-    }
-  }
-
-
-   // Initial calculation of totalValue (call this when initializing the component)
-   calculateTotalValue(): void {
-    this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
-  }
-
-  // Call this method when the mainItemsRecords array is updated
-  updateTotalValueAfterAction(): void {
-    this.calculateTotalValue();
-    console.log('Updated Total Value:', this.totalValue);
-  }
-
   ngOnInit() {
-
     this._ApiService.get<ServiceMaster[]>('servicenumbers').subscribe(response => {
-      this.recordsServiceNumber = response
-      //.filter(record => record.deletionIndicator === false);
+      this.recordsServiceNumber = response;
     });
     this._ApiService.get<MaterialGroup[]>('materialgroups').subscribe(response => {
       this.recordsMaterialGroup = response
@@ -253,15 +105,15 @@ export class ExecutionOrderComponent {
     this._ApiService.get<any[]>('measurements').subscribe(response => {
       this.recordsUnitOfMeasure = response;
     });
-
     if (this.savedInMemory) {
       this.mainItemsRecords = [...this._ExecutionOrderService.getMainItems()];
       console.log(this.mainItemsRecords);
-
     }
     this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}`).subscribe({
       next: (res) => {
         this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
+        this.itemText=this.mainItemsRecords[0].salesOrderItemText?this.mainItemsRecords[0].salesOrderItemText:"";
+        console.log(this.itemText);
         console.log(this.mainItemsRecords);
         this.loading = false;
         const filteredRecords = this.mainItemsRecords.filter(record => record.lineTypeCode != "Contingency line");
@@ -292,6 +144,137 @@ export class ExecutionOrderComponent {
     //   }
     // });
   }
+
+  showSalesQuotationDialog() {
+    this.displayTenderingDocumentDialog = true;
+    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}&salesOrderItem=10`).subscribe({
+      // next: (res) => {
+      //   this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
+      //   console.log(this.mainItemsRecords);
+      // }
+      next: (res) => {
+        const uniqueRecords = res.filter(newRecord => 
+          !this.mainItemsRecords.some(existingRecord => 
+            existingRecord.invoiceMainItemCode === newRecord.invoiceMainItemCode
+          )
+        );
+        this.salesQuotations = uniqueRecords.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
+        console.log(this.mainItemsRecords);
+      }
+      , error: (err) => {
+        console.log(err);
+      },
+      complete: () => {
+      }
+    });
+  }
+
+  openDocumentDialog() {
+    this.displayTenderingDocumentDialog = true;
+  }
+  saveSelection() {
+    console.log('Selected items:', this.selectedSalesQuotations);
+    this.displayTenderingDocumentDialog = false;
+  }
+  cancelMainItemSalesQuotation(item: any): void {
+    this.selectedSalesQuotations = this.selectedSalesQuotations.filter(i => i !== item);
+  }
+  // for selected sales quotation:
+  saveMainItem(mainItem: MainItemSalesQuotation) {
+    console.log(mainItem);
+    const newRecord: MainItem = {
+      //
+      invoiceMainItemCode:mainItem.invoiceMainItemCode,
+      //
+      serviceNumberCode: mainItem.serviceNumberCode,
+      unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
+      //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
+      currencyCode: mainItem.currencyCode,
+      description: mainItem.description,
+      materialGroupCode: mainItem.materialGroupCode,
+      serviceTypeCode: mainItem.serviceTypeCode,
+      personnelNumberCode: mainItem.personnelNumberCode,
+      lineTypeCode: mainItem.lineTypeCode,
+      totalQuantity: mainItem.quantity,
+      amountPerUnit: mainItem.amountPerUnit,
+      total: mainItem.total,
+      actualQuantity: mainItem.actualQuantity,
+      actualPercentage: mainItem.actualPercentage,
+      overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
+      unlimitedOverFulfillment: mainItem.unlimitedOverFulfillment,
+      manualPriceEntryAllowed: mainItem.manualPriceEntryAllowed,
+      externalServiceNumber: mainItem.externalServiceNumber,
+      serviceText: mainItem.serviceText,
+      lineText: mainItem.lineText,
+      lineNumber: mainItem.lineNumber,
+      biddersLine: mainItem.biddersLine,
+      supplementaryLine: mainItem.supplementaryLine,
+      lotCostOne: mainItem.lotCostOne,
+      doNotPrint: mainItem.doNotPrint,
+      Type: '',
+      executionOrderMainCode: 0
+    }
+    console.log(newRecord);
+    if (newRecord.totalQuantity === 0) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: ' Quantity is required',
+        life: 3000
+      });
+    }
+    else {
+      console.log(newRecord);
+      //................
+      const bodyRequest: any = {
+        quantity: newRecord.totalQuantity,
+        amountPerUnit: newRecord.amountPerUnit,
+      };
+      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
+        next: (res) => {
+          console.log('mainitem with total:', res);
+          newRecord.total = res.total;
+          console.log(' Record:', newRecord);
+          const filteredRecord = Object.fromEntries(
+            Object.entries(newRecord).filter(([_, value]) => {
+              return value !== '' && value !== 0 && value !== undefined && value !== null;
+            })
+          ) as MainItem;
+          console.log(filteredRecord);
+          this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.savedInMemory = true;
+          // this.cdr.detectChanges();
+          const newMainItems = this._ExecutionOrderService.getMainItems();
+          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          this.mainItemsRecords = [
+            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+            ...newMainItems
+          ];
+          this.updateTotalValueAfterAction();
+          console.log(this.mainItemsRecords);
+          this.resetNewMainItem();
+          const index = this.selectedSalesQuotations.findIndex(item => item.invoiceMainItemCode === mainItem.invoiceMainItemCode);
+          if (index !== -1) {
+            this.selectedSalesQuotations.splice(index, 1);
+          }
+        }, error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+        }
+      });
+      //................
+    }
+  }
+   calculateTotalValue(): void {
+    this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
+  }
+  updateTotalValueAfterAction(): void {
+    this.calculateTotalValue();
+    console.log('Updated Total Value:', this.totalValue);
+  }
+
+  
 
 
   // For Edit  MainItem
