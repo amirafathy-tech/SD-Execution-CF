@@ -408,6 +408,96 @@ export class ExecutionOrderComponent {
       //................
     }
   }
+    // for selected from excel sheet:
+    saveMainItemFromExcel(mainItem: MainItem) {
+      console.log(mainItem);
+      const newRecord: MainItem = {
+        //
+        invoiceMainItemCode:mainItem.invoiceMainItemCode,
+        //
+        serviceNumberCode: mainItem.serviceNumberCode,
+        unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
+        //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
+        currencyCode: mainItem.currencyCode,
+        description: mainItem.description,
+        materialGroupCode: mainItem.materialGroupCode,
+        serviceTypeCode: mainItem.serviceTypeCode,
+        personnelNumberCode: mainItem.personnelNumberCode,
+        lineTypeCode: mainItem.lineTypeCode,
+        totalQuantity: mainItem.totalQuantity,
+        amountPerUnit: mainItem.amountPerUnit,
+        total: mainItem.total,
+        actualQuantity: mainItem.actualQuantity,
+        actualPercentage: mainItem.actualPercentage,
+        overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
+        unlimitedOverFulfillment: mainItem.unlimitedOverFulfillment,
+        manualPriceEntryAllowed: mainItem.manualPriceEntryAllowed,
+        externalServiceNumber: mainItem.externalServiceNumber,
+        serviceText: mainItem.serviceText,
+        lineText: mainItem.lineText,
+        lineNumber: mainItem.lineNumber,
+        biddersLine: mainItem.biddersLine,
+        supplementaryLine: mainItem.supplementaryLine,
+        lotCostOne: mainItem.lotCostOne,
+        doNotPrint: mainItem.doNotPrint,
+        Type: '',
+        executionOrderMainCode: 0
+      }
+      console.log(newRecord);
+      if (newRecord.totalQuantity === 0) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: ' Quantity is required',
+          life: 3000
+        });
+      }
+      else {
+        console.log(newRecord);
+        //................
+        const bodyRequest: any = {
+          quantity: newRecord.totalQuantity,
+          amountPerUnit: newRecord.amountPerUnit,
+        };
+        this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
+          next: (res) => {
+            console.log('mainitem with total:', res);
+            newRecord.total = res.total;
+            console.log(' Record:', newRecord);
+            const filteredRecord = Object.fromEntries(
+              Object.entries(newRecord).filter(([_, value]) => {
+                return value !== '' && value !== 0 && value !== undefined && value !== null;
+              })
+            ) as MainItem;
+            console.log(filteredRecord);
+            this._ExecutionOrderService.addMainItem(filteredRecord);
+            this.savedInMemory = true;
+            // this.cdr.detectChanges();
+            const newMainItems = this._ExecutionOrderService.getMainItems();
+            // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+            this.mainItemsRecords = [
+              ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+              ...newMainItems
+            ];
+            this.updateTotalValueAfterAction();
+            console.log(this.mainItemsRecords);
+            this.resetNewMainItem();
+            const index = this.parsedData.findIndex(item => item.executionOrderMainCode === mainItem.executionOrderMainCode);
+            if (index !== -1) {
+              this.parsedData.splice(index, 1);
+            }
+          }, error: (err) => {
+            console.log(err);
+          },
+          complete: () => {
+          }
+        });
+        //................
+      }
+    }
+    cancelFromExcel(item: any): void {
+      this.parsedData = this.parsedData.filter(i => i !== item);
+    }
    calculateTotalValue(): void {
     this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
   }
@@ -417,7 +507,7 @@ export class ExecutionOrderComponent {
   }
 
   // Excel Import:
-  parsedData: any[] = []; // Parsed data from the Excel file
+  parsedData: MainItem[] = []; // Parsed data from the Excel file
   displayedColumns: string[] = []; // Column headers from the Excel file
 
 
@@ -466,6 +556,8 @@ export class ExecutionOrderComponent {
       console.log('Importing record:', record);
       // Copy or process each record as needed
     });
+    this.displayImportsDialog=false;
+    this.displayExcelDialog=false;
   }
   
 
