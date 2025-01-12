@@ -30,6 +30,7 @@ import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
 import { TreeTableModule } from 'primeng/treetable';
 import { TooltipModule } from 'primeng/tooltip';
+import { FileUploadModule } from 'primeng/fileupload';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -88,6 +89,8 @@ import { CloudDataComponent } from './cloud-data/cloud-data.component';
     FieldsetModule,
     TreeTableModule,
     TooltipModule,
+    FileUploadModule,
+    
   
     NgHttpLoaderModule.forRoot(),
   ],

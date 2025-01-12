@@ -6,7 +6,7 @@ import { ServiceMaster } from '../models/service-master.model';
 import { UnitOfMeasure } from '../models/unitOfMeasure.model';
 import { ApiService } from '../shared/ApiService.service';
 import * as FileSaver from 'file-saver';
-
+import * as XLSX from 'xlsx';
 
 import { MainItem } from './execution-order.model';
 import { MaterialGroup } from '../models/materialGroup.model';
@@ -14,6 +14,8 @@ import { ServiceType } from '../models/serviceType.model';
 import { LineType } from '../models/lineType.model';
 import { Router } from '@angular/router';
 import { MainItemSalesQuotation } from '../models/sales-quotation.model';
+import { ModelEntity, ModelSpecDetails } from '../models/model-specs.model';
+import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-execution-order',
   templateUrl: './execution-order.component.html',
@@ -30,11 +32,18 @@ export class ExecutionOrderComponent {
   referenceSDDocument!:number;
   itemText:string="";
 
-
+  displayImportsDialog = false;
   displayTenderingDocumentDialog = false;
+  displayModelSpecsDialog = false;
+  displayModelSpecsDetailsDialog = false;
+  displayExcelDialog = false;
 
   selectedSalesQuotations: MainItemSalesQuotation[] = [];
   salesQuotations: MainItemSalesQuotation[] = [];
+
+  selectedModelSpecsDetails: ModelSpecDetails[] = [];
+  models: ModelEntity[] = [];
+  modelSpecsDetails: ModelSpecDetails[] = [];
 
   savedInMemory: boolean = false;
 
@@ -145,6 +154,15 @@ export class ExecutionOrderComponent {
     // });
   }
 
+  showImportsDialog() {
+    this.displayImportsDialog = true;
+
+  }
+  showExcelDialog() {
+    this.displayExcelDialog = true;
+
+  }
+
   showSalesQuotationDialog() {
     this.displayTenderingDocumentDialog = true;
     this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}&salesOrderItem=10`).subscribe({
@@ -167,6 +185,40 @@ export class ExecutionOrderComponent {
       complete: () => {
       }
     });
+  }
+  showModelSpecsDialog() {
+    this.displayModelSpecsDialog = true;
+    this._ApiService.get<ModelEntity[]>(`modelspecs`).subscribe({
+      next: (res) => {
+        // const uniqueRecords = res.filter(newRecord => 
+        //   !this.mainItemsRecords.some(existingRecord => 
+        //     existingRecord.invoiceMainItemCode === newRecord.modelSpecCode
+        //   )
+        // );
+        this.models = res.sort((a, b) => a.modelSpecCode - b.modelSpecCode);
+        console.log(this.models);
+      }
+      , error: (err) => {
+        console.log(err);
+      },
+      complete: () => {
+      }
+    });
+  }
+  showModelSpecsDetailsDialog(model:ModelEntity) {
+    this.displayModelSpecsDetailsDialog = true;
+    const detailObservables = model.modelSpecDetailsCode.map(code =>
+      this._ApiService.getID<ModelSpecDetails>('modelspecdetails', code)
+    );
+    forkJoin(detailObservables).subscribe(records => {
+      this.modelSpecsDetails = records.sort((a, b) => b.modelSpecDetailsCode - a.modelSpecDetailsCode);
+    });
+  }
+  saveSelectionModelSpecsDetails() {
+    console.log('Selected items:', this.selectedModelSpecsDetails);
+    this.displayModelSpecsDetailsDialog = false;
+    this.displayModelSpecsDialog=false;
+    this.displayImportsDialog=false;
   }
 
   openDocumentDialog() {
@@ -196,8 +248,8 @@ export class ExecutionOrderComponent {
       personnelNumberCode: mainItem.personnelNumberCode,
       lineTypeCode: mainItem.lineTypeCode,
       totalQuantity: mainItem.quantity,
-      amountPerUnit: mainItem.amountPerUnit,
-      total: mainItem.total,
+      amountPerUnit: mainItem.amountPerUnitWithProfit,
+      total: mainItem.totalWithProfit,
       actualQuantity: mainItem.actualQuantity,
       actualPercentage: mainItem.actualPercentage,
       overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
@@ -266,6 +318,96 @@ export class ExecutionOrderComponent {
       //................
     }
   }
+  cancelModelSpecsDetails(item: any): void {
+    this.selectedModelSpecsDetails = this.selectedModelSpecsDetails.filter(i => i !== item);
+  }
+  // for selected models specs details:
+  saveModelSpecsDetails(item: ModelSpecDetails) {
+    console.log(item);
+    const newRecord: MainItem = {
+      //
+      invoiceMainItemCode:item.modelSpecDetailsCode,
+      //
+      serviceNumberCode: item.serviceNumberCode,
+      unitOfMeasurementCode: item.unitOfMeasurementCode,
+      //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
+      currencyCode: item.currencyCode,
+      description: item.shortText,
+      materialGroupCode: item.materialGroupCode,
+      serviceTypeCode: item.serviceTypeCode,
+      personnelNumberCode: item.personnelNumberCode,
+      lineTypeCode: item.lineTypeCode,
+      totalQuantity: item.quantity,
+      amountPerUnit: item.grossPrice,
+      total: item.netValue,
+      actualQuantity: item.actualQuantity,
+      actualPercentage: item.actualPercentage,
+      overFulfillmentPercentage: item.overFulfilmentPercentage,
+      unlimitedOverFulfillment: item.unlimitedOverFulfillment,
+      manualPriceEntryAllowed: item.manualPriceEntryAllowed,
+      externalServiceNumber: item.externalServiceNumber,
+      serviceText: item.serviceText,
+      lineText: item.lineText,
+      lineNumber: item.lineNumber,
+      biddersLine: item.biddersLine,
+      supplementaryLine: item.supplementaryLine,
+      lotCostOne: item.lotSizeForCostingIsOne,
+      // doNotPrint: item.doNotPrint,
+      Type: '',
+      executionOrderMainCode: 0
+    }
+    console.log(newRecord);
+    if (newRecord.totalQuantity === 0) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: ' Quantity is required',
+        life: 3000
+      });
+    }
+    else {
+      console.log(newRecord);
+      //................
+      const bodyRequest: any = {
+        quantity: newRecord.totalQuantity,
+        amountPerUnit: newRecord.amountPerUnit,
+      };
+      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
+        next: (res) => {
+          console.log('mainitem with total:', res);
+          newRecord.total = res.total;
+          console.log(' Record:', newRecord);
+          const filteredRecord = Object.fromEntries(
+            Object.entries(newRecord).filter(([_, value]) => {
+              return value !== '' && value !== 0 && value !== undefined && value !== null;
+            })
+          ) as MainItem;
+          console.log(filteredRecord);
+          this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.savedInMemory = true;
+          // this.cdr.detectChanges();
+          const newMainItems = this._ExecutionOrderService.getMainItems();
+          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          this.mainItemsRecords = [
+            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+            ...newMainItems
+          ];
+          this.updateTotalValueAfterAction();
+          console.log(this.mainItemsRecords);
+          this.resetNewMainItem();
+          const index = this.selectedModelSpecsDetails.findIndex(item => item.modelSpecDetailsCode === item.modelSpecDetailsCode);
+          if (index !== -1) {
+            this.selectedModelSpecsDetails.splice(index, 1);
+          }
+        }, error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+        }
+      });
+      //................
+    }
+  }
    calculateTotalValue(): void {
     this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
   }
@@ -274,7 +416,61 @@ export class ExecutionOrderComponent {
     console.log('Updated Total Value:', this.totalValue);
   }
 
+  // Excel Import:
+  parsedData: any[] = []; // Parsed data from the Excel file
+  displayedColumns: string[] = []; // Column headers from the Excel file
+
+
+  onFileSelect(event: any) {
+    const file = event.files[0];
+    const reader = new FileReader();
   
+    reader.onload = (e: any) => {
+      const binaryData = e.target.result;
+      const workbook = XLSX.read(binaryData, { type: 'binary' });
+  
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+  
+      // Explicitly type jsonData as any[][]
+      const jsonData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  
+      if (jsonData.length > 0) {
+        // Extract headers (first row) and ensure they're valid strings
+        this.displayedColumns = jsonData[0].filter((col: any) => typeof col === 'string' && col.trim() !== '') as string[];
+        // Extract rows (data) and map them to objects
+        this.parsedData = jsonData.slice(1).map((row: any[]) => {
+          const rowData: any = {};
+          this.displayedColumns.forEach((col, index) => {
+            rowData[col] = row[index] !== undefined ? row[index] : ''; // Ensure all columns have values
+          });
+          return rowData;
+        });
+      } else {
+        this.displayedColumns = [];
+        this.parsedData = [];
+      }
+    };
+  
+    reader.readAsBinaryString(file);
+  }
+  
+
+  
+  
+
+  importSelectedRecords() {
+    console.log('Records to Import:', this.parsedData);
+    // You can now iterate over the parsed data and copy it to your main table
+    this.parsedData.forEach(record => {
+      console.log('Importing record:', record);
+      // Copy or process each record as needed
+    });
+  }
+  
+
+
+  //End Excel Import:
 
 
   // For Edit  MainItem
@@ -821,30 +1017,6 @@ export class ExecutionOrderComponent {
           }
 
         })
-        // .toPromise()
-        //   .then((responses) => {
-        //     console.log('All main items saved successfully:', responses);
-        //     this.ngOnInit();
-
-        //     // Optionally, update the saved records as persisted
-        //     //  unsavedItems.forEach(item => item.isPersisted = true);
-
-        //     this.messageService.add({
-        //       severity: 'success',
-        //       summary: 'Success',
-        //       detail: 'The Document has been saved successfully',
-        //       life: 3000
-        //     });
-        //   })
-        //   .catch((error) => {
-        //     console.error('Error saving main items:', error);
-        //     this.messageService.add({
-        //       severity: 'error',
-        //       summary: 'Error',
-        //       detail: 'Error saving The Document',
-        //       life: 3000
-        //     });
-        //   });
       }, reject: () => {
 
       }

@@ -14,7 +14,8 @@
             <button pButton icon="pi pi-print" size="small" class="m-2 "></button>
             <button pButton label="Export" size="small" (click)="exportExcel()" icon="pi pi-download"
                 class="m-2"></button>
-            <button pButton label="Quotations" size="small" (click)="showSalesQuotationDialog()" class="m-2"></button>
+            <!-- <button pButton label="Quotations" size="small" (click)="showSalesQuotationDialog()" class="m-2"></button> -->
+            <p-button (click)="showImportsDialog()" icon="pi pi-external-link" label="Import"></p-button>
 
         </div>
     </p-toolbar>
@@ -589,7 +590,7 @@
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.amountPerUnit}} -->
                     <input pInputNumber name="amountPerUnit" class="rounded-input" type="number" [min]="0"
-                    [(ngModel)]="mainItem.amountPerUnit">
+                    [(ngModel)]="mainItem.amountPerUnitWithProfit">
                 </td>
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.currencyCode}} -->
@@ -606,7 +607,7 @@
                 </td>
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.total}} -->
-                    {{ (mainItem.quantity ?? 0) * (mainItem.amountPerUnit ?? 0) }}
+                    {{ (mainItem.quantity ?? 0) * (mainItem.amountPerUnitWithProfit ?? 0) }}
                 </td>
                 <td style="min-width: 10rem;">
                     <input pInputNumber class="rounded-input" disabled name="actualQuantity" type="number" [min]="0">
@@ -731,6 +732,202 @@
                         </button>
                         <button pButton type="button" icon="pi pi-times" class="p-button-danger" label="Cancel"
                             style=" border-radius: 8px; " (click)="cancelMainItemSalesQuotation(mainItem)">
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </ng-container>
+
+        <ng-container *ngIf="selectedModelSpecsDetails">
+            <tr *ngFor="let item of selectedModelSpecsDetails">
+                <td style="min-width: 10rem;">
+                  
+                </td>
+                <td style="min-width: 10rem;"> </td>
+                <td style="min-width: 10rem;"></td>
+                <td style="min-width: 10rem;">
+                    <input pInputNumber name="lineNumber" class="rounded-input" type="text"
+                    [(ngModel)]="item.lineNumber">
+                </td>
+                <td style="min-width: 10rem;">
+                    <ng-container *ngIf="item">
+                        <p-dropdown [options]="recordsServiceNumber" [(ngModel)]="item.serviceNumberCode"
+                        [ngModelOptions]="{standalone: true}" optionValue="serviceNumberCode" optionLabel="description"
+                        [filter]="true" [filterFields]="['searchTerm','description']" [showClear]="true"
+                        placeholder="Select SeviceNumber" (onChange)="onServiceNumberChange($event)" [appendTo]="'body'"
+                        [virtualScroll]="true" [virtualScrollItemSize]="40">
+                        <ng-template let-record pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ record.searchTerm }}::{{ record.description }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                    </ng-container>
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{ mainItem.description }} -->
+                    <input pInputText name="description" class="rounded-input" type="text"
+                    [(ngModel)]="item.shortText">
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{mainItem.quantity}} -->
+                    <input pInputNumber name="quantity" class="rounded-input" type="number" [min]="0"
+                    [(ngModel)]="item.quantity">
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{mainItem.unitOfMeasurementCode}} -->
+                    <p-dropdown [options]="recordsUnitOfMeasure" [(ngModel)]="item.unitOfMeasurementCode"
+                    [ngModelOptions]="{standalone: true}" optionValue="code"
+                    optionLabel="code" [filter]="true"
+                    [filterFields]="['code','description']" [showClear]="true"
+                    placeholder="Select UnitOfMeasure" [required]="true" [appendTo]="'body'" [virtualScroll]="true"
+                    [virtualScrollItemSize]="40">
+                    <ng-template let-record pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ record.code }}::{{ record.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+                 
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{mainItem.amountPerUnit}} -->
+                    <input pInputNumber name="amountPerUnit" class="rounded-input" type="number" [min]="0"
+                    [(ngModel)]="item.grossPrice">
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{mainItem.currencyCode}} -->
+                    <p-dropdown [options]="recordsCurrency" [(ngModel)]="item.currencyCode"
+                    [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                    [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
+                    [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                    <ng-template let-record pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ record.code }}::{{ record.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+                </td>
+                <td style="min-width: 10rem;">
+                    <!-- {{mainItem.total}} -->
+                    {{ (item.quantity ?? 0) * (item.grossPrice ?? 0) }}
+                </td>
+                <td style="min-width: 10rem;">
+                    <input pInputNumber class="rounded-input" disabled name="actualQuantity" type="number" [min]="0">
+                </td>
+                <td style="min-width: 10rem;">
+                    <input pInputNumber class="rounded-input" disabled name="actualPercentage" type="number" [min]="0">
+                </td>
+                <td style="min-width: 10rem;">
+                    <input pInputNumber name="overFulfillmentPercentage" type="number" [min]="0"
+                        [(ngModel)]="item.overFulfilmentPercentage" class="rounded-input">
+                </td>
+                <!-- Unlimited OverFulfillment -->
+                <td style="min-width: 10rem;">
+                    <input pInputNumber name="unlimitedOverFulfillment" type="checkbox"
+                        [(ngModel)]="item.unlimitedOverFulfillment" class="rounded-input">
+                </td>
+                <!-- Manual Price Entry Allowed -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="manualPriceEntryAllowed" type="checkbox"
+                        [(ngModel)]="item.priceChangedAllowed" class="rounded-input">
+                </td>
+                <!-- Material Grp -->
+                <td style="min-width: 10rem;">
+                    <ng-container *ngIf="item">
+                        <p-dropdown [options]="recordsMaterialGroup" [(ngModel)]="item.materialGroupCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                            [filterFields]="['code','description']" [showClear]="true" placeholder="Select MaterialGrp"
+                            [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.code }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-container>
+                </td>
+                <!-- Service Type  -->
+                <td style="min-width: 10rem;">
+                    <ng-container *ngIf="item">
+                        <p-dropdown [options]="recordsServiceType" [(ngModel)]="item.serviceTypeCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="serviceId" optionLabel="serviceId"
+                            [filter]="true" [filterFields]="['serviceId','description']" [showClear]="true"
+                            placeholder="Select ServiceType" [appendTo]="'body'" [virtualScroll]="true"
+                            [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.serviceId }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-container>
+                </td>
+                <!-- External Service Number -->
+                <td style="min-width: 10rem;">
+                    <input pInputNumber name="externalServiceNumber" type="text"
+                        [(ngModel)]="item.externalServiceNumber" class="rounded-input"
+                        pTooltip="{{ item.externalServiceNumber }}" tooltipPosition="top" [autoHide]="false">
+                </td>
+                <!-- Service Text -->
+                <td style="min-width: 10rem;">
+                    <input pInputNumber name="serviceText" class="rounded-input" type="text"
+                        [(ngModel)]="item.serviceText" pTooltip="{{ item.serviceText }}" tooltipPosition="top"
+                        [autoHide]="false">
+
+                </td>
+                <!--  Line Text -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="lineText" class="rounded-input" type="text" [(ngModel)]="item.lineText"
+                        pTooltip="{{ item.lineText }}" tooltipPosition="top" [autoHide]="false">
+                </td>
+                <!-- Personnel Number -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="personnelNumberCode" class="rounded-input" type="text"
+                        [(ngModel)]="item.personnelNumberCode" pTooltip="{{ item.personnelNumberCode }}"
+                        tooltipPosition="top" [autoHide]="false">
+                </td>
+                <!-- Line Type  mainItem.lineTypeCode-->
+                <td style="min-width: 10rem;">
+                    <ng-container *ngIf="item">
+                        <p-dropdown [options]="recordsLineType" [(ngModel)]="item.lineTypeCode"
+                            [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
+                            [filterFields]="['code','description']" [showClear]="true" placeholder="Select LineType"
+                            [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
+                            <ng-template let-record pTemplate="item">
+                                <div class="flex align-items-center gap-2">
+                                    <div>{{ record.code }}::{{ record.description }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-container>
+                </td>
+
+                <!-- Bidders Line -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="biddersLine" class="rounded-input" type="checkbox"
+                        [(ngModel)]="item.biddersLine">
+                </td>
+
+                <!--  Supplementary Line  -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="supplementaryLine" class="rounded-input" type="checkbox"
+                        [(ngModel)]="item.supplementaryLine">
+                </td>
+
+                <!-- Lot Cost One -->
+                <td style="min-width: 10rem;">
+                    <input pInputText name="lotCostOne" class="rounded-input" type="checkbox"
+                        [(ngModel)]="item.lotSizeForCostingIsOne">
+                </td>
+               
+                <td style="min-width: 10rem;">
+                    <div class="flex align-items-center justify-content-center gap-2">
+                        <button pButton type="button" icon="pi pi-plus" class="ui-button-info" label="Add"
+                            style=" border-radius: 8px; " (click)="saveModelSpecsDetails(item)">
+                        </button>
+                        <button pButton type="button" icon="pi pi-times" class="p-button-danger" label="Cancel"
+                            style=" border-radius: 8px; " (click)="cancelModelSpecsDetails(item)">
                         </button>
                     </div>
                 </td>
@@ -962,6 +1159,16 @@
 
 </p-table>
 
+<p-dialog header="Import From:" class="header-color" [(visible)]="displayImportsDialog" [modal]="true"
+    [style]="{width: '70vw'}" [responsive]="true">
+
+    <div class="flex align-items-between justify-content-between">
+        <button pButton label="Quotations ?" size="small" (click)="showSalesQuotationDialog()" class="m-2"></button>
+        <button pButton label="Models ?" size="small" (click)="showModelSpecsDialog()" class="m-2"></button>
+        <!-- <button pButton label="Excel Sheet ?" size="small" (click)="showExcelDialog()" class="m-2"></button> -->
+    </div>
+</p-dialog>
+<!-- Quotations Dialog -->
 <p-dialog header="Select Rows to Copy:" class="header-color" [(visible)]="displayTenderingDocumentDialog" [modal]="true"
     [style]="{width: '70vw'}" [responsive]="true">
 
@@ -1005,7 +1212,7 @@
                 </td>
                 <td> {{mainItem.quantity}}</td>
                 <!-- <td> <input pInputNumber name="quantity" type="number" [min]="0"></td> -->
-                <td> {{mainItem.amountPerUnit}}</td>
+                <td> {{mainItem.amountPerUnitWithProfit}}</td>
                 <td> {{mainItem.currencyCode}}</td>
 
 
@@ -1018,6 +1225,134 @@
         <button pButton type="button" (click)="displayTenderingDocumentDialog = false" style=" border-radius: 8px; "
             label="Cancel" class="p-button-secondary"></button>
     </p-footer>
+</p-dialog>
+
+<!-- Models Dialog -->
+<p-dialog header="Select Rows to Copy:" class="header-color" [(visible)]="displayModelSpecsDialog" [modal]="true"
+    [style]="{width: '70vw'}" [responsive]="true">
+
+    <p-table [value]="models" selectionMode="multiple" 
+        dataKey="modelSpecCode">
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Selection</th>
+                <th>ModelServSpec</th>
+                <th>Description</th>
+                <th>Services</th>
+                
+
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-model let-ri="rowIndex">
+            <tr>
+                <td>
+                    <p-tableCheckbox [value]="model" />
+                </td>
+                <td>
+                    {{ ri + 1 }}
+                </td>
+                <td>
+                    {{ model.modelServSpec }}
+                </td>
+                <td>
+                    {{ model.description }}
+                </td>
+                <td>
+                    <button pButton (click)="showModelSpecsDetailsDialog(model)" icon="pi pi-external-link" size="small"
+                    label="Services"></button>
+                </td>
+
+
+            </tr>
+        </ng-template>
+    </p-table>
+  
+</p-dialog>
+
+<!-- Model Details (Services) Dialog -->
+<p-dialog header="Select Rows to Copy:" class="header-color" [(visible)]="displayModelSpecsDetailsDialog" [modal]="true"
+    [style]="{width: '70vw'}" [responsive]="true">
+
+    <p-table [value]="modelSpecsDetails" selectionMode="multiple" [(selection)]="selectedModelSpecsDetails"
+        dataKey="modelSpecDetailsCode">
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Selection</th>
+                <th>Index.No</th>
+                <th>Service Number</th>
+                <th>Description</th>
+                <th>UOM</th>
+                <th>Quantity</th>
+                <th>AmountPerUnit</th>
+                <th>Currency</th>
+
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-modelDetails let-ri="rowIndex">
+            <tr>
+                <td>
+                    <p-tableCheckbox [value]="modelDetails" />
+                </td>
+                <td>
+                    {{ ri + 1 }}
+                </td>
+                <td>
+                    {{ modelDetails.serviceNumberCode }}
+                </td>
+                <td>
+                    {{ modelDetails.shortText }}
+                </td>
+                <td>
+                    {{ modelDetails.unitOfMeasurementCode }}
+                </td>
+                <td> {{modelDetails.quantity}}</td>
+                <!-- <td> <input pInputNumber name="quantity" type="number" [min]="0"></td> -->
+                <td> {{modelDetails.grossPrice}}</td>
+                <td> {{modelDetails.currencyCode}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+    <p-footer>
+        <button pButton type="button" (click)="saveSelectionModelSpecsDetails()" style=" border-radius: 8px; margin-right: 3px;  "
+            label="Copy"></button>
+        <button pButton type="button" (click)="displayModelSpecsDetailsDialog = false" style=" border-radius: 8px; "
+            label="Cancel" class="p-button-secondary"></button>
+    </p-footer>
+  
+</p-dialog>
+
+<!-- Excel Dialog -->
+<p-dialog header="Select Rows to Copy:" class="header-color" [(visible)]="displayExcelDialog" [modal]="true"
+    [style]="{width: '70vw'}" [responsive]="true">
+    <div class="flex align-items-center justify-content-center flex-column">
+        <p-fileUpload 
+            name="file" 
+            accept=".xlsx,.xls" 
+            mode="basic" 
+            (onSelect)="onFileSelect($event)" 
+            [auto]="true" 
+            class="m-2" 
+            chooseLabel="Choose Excel File">
+        </p-fileUpload>
+        <p *ngIf="parsedData.length > 0">Selected Records:</p>
+        <p-table *ngIf="parsedData.length > 0" [value]="parsedData" [rows]="10" [paginator]="true">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th *ngFor="let col of displayedColumns">{{ col }}</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+                <tr>
+                    <td *ngFor="let col of displayedColumns">{{ row[col] }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <button pButton label="Import Selected" (click)="importSelectedRecords()" class="mt-3"></button>
+    </div>
+
+  
 </p-dialog>
 
 <p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
