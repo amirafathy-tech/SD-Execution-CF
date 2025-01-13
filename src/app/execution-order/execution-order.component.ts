@@ -29,8 +29,8 @@ export class ExecutionOrderComponent {
   documentNumber!: number;
   itemNumber!: number;
   customerId!: number;
-  referenceSDDocument!:number;
-  itemText:string="";
+  referenceSDDocument!: number;
+  itemText: string = "";
 
   displayImportsDialog = false;
   displayTenderingDocumentDialog = false;
@@ -92,7 +92,7 @@ export class ExecutionOrderComponent {
     this.itemNumber = this.router.getCurrentNavigation()?.extras.state?.['itemNumber'];
     this.customerId = this.router.getCurrentNavigation()?.extras.state?.['customerId'];
     this.referenceSDDocument = this.router.getCurrentNavigation()?.extras.state?.['referenceSDDocument'];
-    console.log(this.documentNumber, this.itemNumber, this.customerId,this.referenceSDDocument);
+    console.log(this.documentNumber, this.itemNumber, this.customerId, this.referenceSDDocument);
 
   }
   ngOnInit() {
@@ -121,7 +121,7 @@ export class ExecutionOrderComponent {
     this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}`).subscribe({
       next: (res) => {
         this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
-        this.itemText=this.mainItemsRecords[0].salesOrderItemText?this.mainItemsRecords[0].salesOrderItemText:"";
+        this.itemText = this.mainItemsRecords[0].salesOrderItemText ? this.mainItemsRecords[0].salesOrderItemText : "";
         console.log(this.itemText);
         console.log(this.mainItemsRecords);
         this.loading = false;
@@ -171,8 +171,8 @@ export class ExecutionOrderComponent {
       //   console.log(this.mainItemsRecords);
       // }
       next: (res) => {
-        const uniqueRecords = res.filter(newRecord => 
-          !this.mainItemsRecords.some(existingRecord => 
+        const uniqueRecords = res.filter(newRecord =>
+          !this.mainItemsRecords.some(existingRecord =>
             existingRecord.invoiceMainItemCode === newRecord.invoiceMainItemCode
           )
         );
@@ -205,7 +205,7 @@ export class ExecutionOrderComponent {
       }
     });
   }
-  showModelSpecsDetailsDialog(model:ModelEntity) {
+  showModelSpecsDetailsDialog(model: ModelEntity) {
     this.displayModelSpecsDetailsDialog = true;
     const detailObservables = model.modelSpecDetailsCode.map(code =>
       this._ApiService.getID<ModelSpecDetails>('modelspecdetails', code)
@@ -217,8 +217,8 @@ export class ExecutionOrderComponent {
   saveSelectionModelSpecsDetails() {
     console.log('Selected items:', this.selectedModelSpecsDetails);
     this.displayModelSpecsDetailsDialog = false;
-    this.displayModelSpecsDialog=false;
-    this.displayImportsDialog=false;
+    this.displayModelSpecsDialog = false;
+    this.displayImportsDialog = false;
   }
 
   openDocumentDialog() {
@@ -236,7 +236,7 @@ export class ExecutionOrderComponent {
     console.log(mainItem);
     const newRecord: MainItem = {
       //
-      invoiceMainItemCode:mainItem.invoiceMainItemCode,
+      invoiceMainItemCode: mainItem.invoiceMainItemCode,
       //
       serviceNumberCode: mainItem.serviceNumberCode,
       unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
@@ -326,7 +326,7 @@ export class ExecutionOrderComponent {
     console.log(item);
     const newRecord: MainItem = {
       //
-      invoiceMainItemCode:item.modelSpecDetailsCode,
+      invoiceMainItemCode: item.modelSpecDetailsCode,
       //
       serviceNumberCode: item.serviceNumberCode,
       unitOfMeasurementCode: item.unitOfMeasurementCode,
@@ -408,97 +408,97 @@ export class ExecutionOrderComponent {
       //................
     }
   }
-    // for selected from excel sheet:
-    saveMainItemFromExcel(mainItem: MainItem) {
-      console.log(mainItem);
-      const newRecord: MainItem = {
-        //
-        invoiceMainItemCode:mainItem.invoiceMainItemCode,
-        //
-        serviceNumberCode: mainItem.serviceNumberCode,
-        unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
-        //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
-        currencyCode: mainItem.currencyCode,
-        description: mainItem.description,
-        materialGroupCode: mainItem.materialGroupCode,
-        serviceTypeCode: mainItem.serviceTypeCode,
-        personnelNumberCode: mainItem.personnelNumberCode,
-        lineTypeCode: mainItem.lineTypeCode,
-        totalQuantity: mainItem.totalQuantity,
-        amountPerUnit: mainItem.amountPerUnit,
-        total: mainItem.total,
-        actualQuantity: mainItem.actualQuantity,
-        actualPercentage: mainItem.actualPercentage,
-        overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
-        unlimitedOverFulfillment: mainItem.unlimitedOverFulfillment,
-        manualPriceEntryAllowed: mainItem.manualPriceEntryAllowed,
-        externalServiceNumber: mainItem.externalServiceNumber,
-        serviceText: mainItem.serviceText,
-        lineText: mainItem.lineText,
-        lineNumber: mainItem.lineNumber,
-        biddersLine: mainItem.biddersLine,
-        supplementaryLine: mainItem.supplementaryLine,
-        lotCostOne: mainItem.lotCostOne,
-        doNotPrint: mainItem.doNotPrint,
-        Type: '',
-        executionOrderMainCode: 0
-      }
+  // for selected from excel sheet:
+  saveMainItemFromExcel(mainItem: MainItem) {
+    console.log(mainItem);
+    const newRecord: MainItem = {
+      //
+      invoiceMainItemCode: mainItem.invoiceMainItemCode,
+      //
+      serviceNumberCode: mainItem.serviceNumberCode,
+      unitOfMeasurementCode: mainItem.unitOfMeasurementCode,
+      //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
+      currencyCode: mainItem.currencyCode,
+      description: mainItem.description,
+      materialGroupCode: mainItem.materialGroupCode,
+      serviceTypeCode: mainItem.serviceTypeCode,
+      personnelNumberCode: mainItem.personnelNumberCode,
+      lineTypeCode: mainItem.lineTypeCode,
+      totalQuantity: mainItem.totalQuantity,
+      amountPerUnit: mainItem.amountPerUnit,
+      total: mainItem.total,
+      actualQuantity: mainItem.actualQuantity,
+      actualPercentage: mainItem.actualPercentage,
+      overFulfillmentPercentage: mainItem.overFulfillmentPercentage,
+      unlimitedOverFulfillment: mainItem.unlimitedOverFulfillment,
+      manualPriceEntryAllowed: mainItem.manualPriceEntryAllowed,
+      externalServiceNumber: mainItem.externalServiceNumber,
+      serviceText: mainItem.serviceText,
+      lineText: mainItem.lineText,
+      lineNumber: mainItem.lineNumber,
+      biddersLine: mainItem.biddersLine,
+      supplementaryLine: mainItem.supplementaryLine,
+      lotCostOne: mainItem.lotCostOne,
+      doNotPrint: mainItem.doNotPrint,
+      Type: '',
+      executionOrderMainCode: 0
+    }
+    console.log(newRecord);
+    if (newRecord.totalQuantity === 0) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: ' Quantity is required',
+        life: 3000
+      });
+    }
+    else {
       console.log(newRecord);
-      if (newRecord.totalQuantity === 0) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: ' Quantity is required',
-          life: 3000
-        });
-      }
-      else {
-        console.log(newRecord);
-        //................
-        const bodyRequest: any = {
-          quantity: newRecord.totalQuantity,
-          amountPerUnit: newRecord.amountPerUnit,
-        };
-        this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
-          next: (res) => {
-            console.log('mainitem with total:', res);
-            newRecord.total = res.total;
-            console.log(' Record:', newRecord);
-            const filteredRecord = Object.fromEntries(
-              Object.entries(newRecord).filter(([_, value]) => {
-                return value !== '' && value !== 0 && value !== undefined && value !== null;
-              })
-            ) as MainItem;
-            console.log(filteredRecord);
-            this._ExecutionOrderService.addMainItem(filteredRecord);
-            this.savedInMemory = true;
-            // this.cdr.detectChanges();
-            const newMainItems = this._ExecutionOrderService.getMainItems();
-            // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-            this.mainItemsRecords = [
-              ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-              ...newMainItems
-            ];
-            this.updateTotalValueAfterAction();
-            console.log(this.mainItemsRecords);
-            this.resetNewMainItem();
-            const index = this.parsedData.findIndex(item => item.executionOrderMainCode === mainItem.executionOrderMainCode);
-            if (index !== -1) {
-              this.parsedData.splice(index, 1);
-            }
-          }, error: (err) => {
-            console.log(err);
-          },
-          complete: () => {
+      //................
+      const bodyRequest: any = {
+        quantity: newRecord.totalQuantity,
+        amountPerUnit: newRecord.amountPerUnit,
+      };
+      this._ApiService.post<any>(`/total`, bodyRequest).subscribe({
+        next: (res) => {
+          console.log('mainitem with total:', res);
+          newRecord.total = res.total;
+          console.log(' Record:', newRecord);
+          const filteredRecord = Object.fromEntries(
+            Object.entries(newRecord).filter(([_, value]) => {
+              return value !== '' && value !== 0 && value !== undefined && value !== null;
+            })
+          ) as MainItem;
+          console.log(filteredRecord);
+          this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.savedInMemory = true;
+          // this.cdr.detectChanges();
+          const newMainItems = this._ExecutionOrderService.getMainItems();
+          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          this.mainItemsRecords = [
+            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+            ...newMainItems
+          ];
+          this.updateTotalValueAfterAction();
+          console.log(this.mainItemsRecords);
+          this.resetNewMainItem();
+          const index = this.parsedData.findIndex(item => item.executionOrderMainCode === mainItem.executionOrderMainCode);
+          if (index !== -1) {
+            this.parsedData.splice(index, 1);
           }
-        });
-        //................
-      }
+        }, error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+        }
+      });
+      //................
     }
-    cancelFromExcel(item: any): void {
-      this.parsedData = this.parsedData.filter(i => i !== item);
-    }
-   calculateTotalValue(): void {
+  }
+  cancelFromExcel(item: any): void {
+    this.parsedData = this.parsedData.filter(i => i !== item);
+  }
+  calculateTotalValue(): void {
     this.totalValue = this.mainItemsRecords.reduce((sum, item) => sum + (item.total || 0), 0);
   }
   updateTotalValueAfterAction(): void {
@@ -510,8 +510,10 @@ export class ExecutionOrderComponent {
   parsedData: MainItem[] = []; // Parsed data from the Excel file
   displayedColumns: string[] = []; // Column headers from the Excel file
 
+  onFileSelect(event: any, fileUploader: any) {
 
-  onFileSelect(event: any) {
+    console.log('Records before :', this.parsedData);
+    
     const file = event.files[0];
     const reader = new FileReader();
   
@@ -522,32 +524,39 @@ export class ExecutionOrderComponent {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
   
-      // Explicitly type jsonData as any[][]
       const jsonData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
   
       if (jsonData.length > 0) {
-        // Extract headers (first row) and ensure they're valid strings
         this.displayedColumns = jsonData[0].filter((col: any) => typeof col === 'string' && col.trim() !== '') as string[];
-        // Extract rows (data) and map them to objects
         this.parsedData = jsonData.slice(1).map((row: any[]) => {
           const rowData: any = {};
           this.displayedColumns.forEach((col, index) => {
-            rowData[col] = row[index] !== undefined ? row[index] : ''; // Ensure all columns have values
+            rowData[col] = row[index] !== undefined ? row[index] : '';
           });
           return rowData;
         });
+        console.log('Records :', this.parsedData);
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Records copied from the excel sheet successfully!',
+        life: 4000
+      });
       } else {
         this.displayedColumns = [];
         this.parsedData = [];
       }
+  
+      // Reset the file input using the PrimeNG method
+      fileUploader.clear();
     };
   
     reader.readAsBinaryString(file);
   }
   
 
-  
-  
+
+
 
   importSelectedRecords() {
     console.log('Records to Import:', this.parsedData);
@@ -556,10 +565,10 @@ export class ExecutionOrderComponent {
       console.log('Importing record:', record);
       // Copy or process each record as needed
     });
-    this.displayImportsDialog=false;
-    this.displayExcelDialog=false;
+    this.displayImportsDialog = false;
+    this.displayExcelDialog = false;
   }
-  
+
 
 
   //End Excel Import:
@@ -724,7 +733,7 @@ export class ExecutionOrderComponent {
 
             this.mainItemsRecords = this.mainItemsRecords.filter(item => item.executionOrderMainCode !== record.executionOrderMainCode);
             this.updateTotalValueAfterAction();
-             this.cdr.detectChanges();
+            this.cdr.detectChanges();
             console.log(this.mainItemsRecords);
 
             // this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe({
@@ -988,7 +997,7 @@ export class ExecutionOrderComponent {
             ...newMainItems
           ];
           console.log(this.mainItemsRecords);
- 
+
           this.updateTotalValueAfterAction();
 
           this.resetNewMainItem();
@@ -1195,7 +1204,7 @@ export class ExecutionOrderComponent {
       this.selectedMainItems = this.selectedMainItems.filter(item => item !== mainItem);
     }
 
-   
+
 
     // Debugging logs
     console.log('Selected MainItems:', this.selectedMainItems);

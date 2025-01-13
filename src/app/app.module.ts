@@ -31,6 +31,8 @@ import { FieldsetModule } from 'primeng/fieldset';
 import { TreeTableModule } from 'primeng/treetable';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
+import { DragDropModule } from 'primeng/dragdrop';
+
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -90,7 +92,8 @@ import { CloudDataComponent } from './cloud-data/cloud-data.component';
     TreeTableModule,
     TooltipModule,
     FileUploadModule,
-    
+    DragDropModule,
+
   
     NgHttpLoaderModule.forRoot(),
   ],
