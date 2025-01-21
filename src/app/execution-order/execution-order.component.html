@@ -29,7 +29,7 @@
                 {{totalValue | currency }}
             </div>
             <div class="col-2 col-sm-4 border">
-               SAR
+               {{cloudCurrency}}
             </div>
         </div>
     </div>
@@ -225,7 +225,8 @@
             <td style="min-width: 10rem;">
                 <p-cellEditor>
                     <ng-template pTemplate="input">
-                        <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
+                        {{cloudCurrency}}
+                        <!-- <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
                             [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
                             [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
                             [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
@@ -234,11 +235,11 @@
                                     <div>{{ record.code }}::{{ record.description }}</div>
                                 </div>
                             </ng-template>
-                        </p-dropdown>
+                        </p-dropdown> -->
 
                     </ng-template>
                     <ng-template pTemplate="output">
-                        {{ mainItem.currencyCode?mainItem.currencyCode:"SAR" }}
+                        {{ mainItem.currencyCode?mainItem.currencyCode: cloudCurrency }}
                     </ng-template>
                 </p-cellEditor>
             </td>
@@ -593,8 +594,9 @@
                     [(ngModel)]="mainItem.amountPerUnitWithProfit">
                 </td>
                 <td style="min-width: 10rem;">
+                    {{cloudCurrency}}
                     <!-- {{mainItem.currencyCode}} -->
-                    <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
+                    <!-- <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
                     [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
                     [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
                     [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
@@ -603,7 +605,7 @@
                             <div>{{ record.code }}::{{ record.description }}</div>
                         </div>
                     </ng-template>
-                </p-dropdown>
+                </p-dropdown> -->
                 </td>
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.total}} -->
@@ -796,8 +798,9 @@
                     [(ngModel)]="item.grossPrice">
                 </td>
                 <td style="min-width: 10rem;">
+                    {{cloudCurrency}}
                     <!-- {{mainItem.currencyCode}} -->
-                    <p-dropdown [options]="recordsCurrency" [(ngModel)]="item.currencyCode"
+                    <!-- <p-dropdown [options]="recordsCurrency" [(ngModel)]="item.currencyCode"
                     [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
                     [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
                     [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
@@ -806,11 +809,11 @@
                             <div>{{ record.code }}::{{ record.description }}</div>
                         </div>
                     </ng-template>
-                </p-dropdown>
+                </p-dropdown> -->
                 </td>
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.total}} -->
-                    {{ (item.quantity ?? 0) * (item.grossPrice ?? 0) }}
+                    {{ (item.quantity) * (item.grossPrice) }}
                 </td>
                 <td style="min-width: 10rem;">
                     <input pInputNumber class="rounded-input" disabled name="actualQuantity" type="number" [min]="0">
@@ -1005,8 +1008,9 @@
                     [(ngModel)]="mainItem.amountPerUnit">
                 </td>
                 <td style="min-width: 10rem;">
+                    {{cloudCurrency}}
                     <!-- {{mainItem.currencyCode}} -->
-                    <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
+                    <!-- <p-dropdown [options]="recordsCurrency" [(ngModel)]="mainItem.currencyCode"
                     [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
                     [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
                     [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
@@ -1015,7 +1019,7 @@
                             <div>{{ record.code }}::{{ record.description }}</div>
                         </div>
                     </ng-template>
-                </p-dropdown>
+                </p-dropdown> -->
                 </td>
                 <td style="min-width: 10rem;">
                     <!-- {{mainItem.total}} -->
@@ -1225,7 +1229,8 @@
                     class="rounded-input">
             </td>
             <td style="min-width: 10rem;">
-                <p-dropdown [options]="recordsCurrency" [(ngModel)]="selectedCurrency"
+                {{cloudCurrency}}
+                <!-- <p-dropdown [options]="recordsCurrency" [(ngModel)]="selectedCurrency"
                     [ngModelOptions]="{standalone: true}" optionValue="code" optionLabel="code" [filter]="true"
                     [filterFields]="['code','description']" [showClear]="true" placeholder="Select Currency"
                     [required]="true" [appendTo]="'body'" [virtualScroll]="true" [virtualScrollItemSize]="40">
@@ -1234,7 +1239,7 @@
                             <div>{{ record.code }}::{{ record.description }}</div>
                         </div>
                     </ng-template>
-                </p-dropdown>
+                </p-dropdown> -->
 
             </td>
             <td style="min-width: 10rem;">

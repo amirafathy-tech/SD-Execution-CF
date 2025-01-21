@@ -31,6 +31,7 @@ export class ExecutionOrderComponent {
   customerId!: number;
   referenceSDDocument!: number;
   itemText: string = "";
+  cloudCurrency!:string;
 
   displayImportsDialog = false;
   displayTenderingDocumentDialog = false;
@@ -93,6 +94,8 @@ export class ExecutionOrderComponent {
     this.customerId = this.router.getCurrentNavigation()?.extras.state?.['customerId'];
     this.referenceSDDocument = this.router.getCurrentNavigation()?.extras.state?.['referenceSDDocument'];
     console.log(this.documentNumber, this.itemNumber, this.customerId, this.referenceSDDocument);
+    this.cloudCurrency = this.router.getCurrentNavigation()?.extras.state?.['currency'];
+    console.log(this.documentNumber, this.itemNumber, this.customerId,this.cloudCurrency);
 
   }
   ngOnInit() {
@@ -165,7 +168,7 @@ export class ExecutionOrderComponent {
 
   showSalesQuotationDialog() {
     this.displayTenderingDocumentDialog = true;
-    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}&salesOrderItem=10`).subscribe({
+    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}`).subscribe({
       // next: (res) => {
       //   this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
       //   console.log(this.mainItemsRecords);
@@ -735,21 +738,14 @@ export class ExecutionOrderComponent {
             this.updateTotalValueAfterAction();
             this.cdr.detectChanges();
             console.log(this.mainItemsRecords);
-
-            // this._ApiService.delete<MainItem>('executionordermain', record.executionOrderMainCode).subscribe({
-            //   next: (res) => {
-            //     console.log('executionordermain deleted :', res);
-            //     this.totalValue = 0;
-            //     this.ngOnInit()
-            //   }, error: (err) => {
-            //     console.log(err);
-            //   },
-            //   complete: () => {
-            //     this.messageService.add({ severity: 'success', summary: 'Successfully', detail: 'Deleted', life: 3000 });
-            //     this.selectedExecutionOrder=[]
-            //   }
-            // })
           }
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Successfully',
+            detail: 'Deleted',
+            life: 3000,
+          });
+          this.selectedExecutionOrder=[];
         }
       });
     }
@@ -795,7 +791,8 @@ export class ExecutionOrderComponent {
 
       const newRecord: MainItem = {
         unitOfMeasurementCode: this.selectedUnitOfMeasure,
-        currencyCode: this.selectedCurrency,
+        currencyCode: this.cloudCurrency,
+        //this.selectedCurrency,
         description: this.newMainItem.description,
 
         materialGroupCode: this.selectedMaterialGroup,
@@ -918,7 +915,8 @@ export class ExecutionOrderComponent {
         serviceNumberCode: this.selectedServiceNumber,
         unitOfMeasurementCode: this.selectedServiceNumberRecord?.unitOfMeasurementCode,
         //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
-        currencyCode: this.selectedCurrency,
+        currencyCode:this.cloudCurrency,
+        // this.selectedCurrency,
 
         description: this.selectedServiceNumberRecord?.description,
         materialGroupCode: this.selectedServiceNumberRecord?.materialGroupCode,
@@ -1056,7 +1054,7 @@ export class ExecutionOrderComponent {
 
           totalQuantity: item.totalQuantity,
           amountPerUnit: item.amountPerUnit,
-          total: item.total,
+          //total: item.total,
 
 
           // quantities:
@@ -1082,7 +1080,9 @@ export class ExecutionOrderComponent {
         // https://trial.cfapps.us10-001.hana.ondemand.com/executionordermain?salesOrder=6&salesOrderItem=10&customerNumber=591001
 
         // Set dynamic parameters for URL
-        const url = `executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&customerNumber=${this.customerId}`;
+        //localhost:8080/executionordermain?salesOrder=6&salesOrderItem=10&pricingProcedureStep=20&pricingProcedureCounter=1&customerNumber=12000000
+
+        const url = `executionordermain?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}&pricingProcedureStep=20&pricingProcedureCounter=1&customerNumber=${this.customerId}`;
 
         // Send the array of bodyRequest objects to the server in a single POST request
         this._ApiService.post<MainItem[]>(url, saveRequests).subscribe({
