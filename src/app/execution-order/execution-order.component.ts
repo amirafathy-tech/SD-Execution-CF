@@ -121,7 +121,8 @@ export class ExecutionOrderComponent {
       this.mainItemsRecords = [...this._ExecutionOrderService.getMainItems()];
       console.log(this.mainItemsRecords);
     }
-    this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}`).subscribe({
+    //localhost:8080/executionordermain/referenceid?referenceId=6&salesOrderItem=10
+    this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}&salesOrderItem=${this.itemNumber}`).subscribe({
       next: (res) => {
         this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
         this.itemText = this.mainItemsRecords[0].salesOrderItemText ? this.mainItemsRecords[0].salesOrderItemText : "";
