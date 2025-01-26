@@ -169,7 +169,9 @@ export class ExecutionOrderComponent {
 
   showSalesQuotationDialog() {
     this.displayTenderingDocumentDialog = true;
-    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}`).subscribe({
+    // localhost:8080/mainitems?salesOrder=12&salesOrderItem=10
+
+    this._ApiService.get<MainItemSalesQuotation[]>(`mainitems?salesOrder=${this.documentNumber}&salesOrderItem=${this.itemNumber}`).subscribe({
       // next: (res) => {
       //   this.salesQuotations = res.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
       //   console.log(this.mainItemsRecords);
@@ -558,10 +560,6 @@ export class ExecutionOrderComponent {
     reader.readAsBinaryString(file);
   }
   
-
-
-
-
   importSelectedRecords() {
     console.log('Records to Import:', this.parsedData);
     // You can now iterate over the parsed data and copy it to your main table
@@ -787,8 +785,19 @@ export class ExecutionOrderComponent {
 
   };
 
-  addMainItem() {
-    if (!this.selectedServiceNumberRecord) { // if user didn't select serviceNumber 
+  addMainItemInMemory() {
+
+    if(this.newMainItem.description =="" && this.newMainItem.totalQuantity ===0 && this.newMainItem.amountPerUnit === 0){
+      console.log("hereee");
+      console.log(this.newMainItem.description,this.newMainItem.totalQuantity,this.newMainItem.amountPerUnit)
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Description & Quantity and AmountPerUnit are required.',
+        life: 3000,
+      });
+    }
+   else if (!this.selectedServiceNumberRecord) { // if user didn't select serviceNumber 
 
       const newRecord: MainItem = {
         unitOfMeasurementCode: this.selectedUnitOfMeasure,
