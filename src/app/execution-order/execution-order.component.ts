@@ -31,7 +31,7 @@ export class ExecutionOrderComponent {
   customerId!: number;
   referenceSDDocument!: number;
   itemText: string = "";
-  cloudCurrency!:string;
+  cloudCurrency!: string;
 
   displayImportsDialog = false;
   displayTenderingDocumentDialog = false;
@@ -95,7 +95,7 @@ export class ExecutionOrderComponent {
     this.referenceSDDocument = this.router.getCurrentNavigation()?.extras.state?.['referenceSDDocument'];
     console.log(this.documentNumber, this.itemNumber, this.customerId, this.referenceSDDocument);
     this.cloudCurrency = this.router.getCurrentNavigation()?.extras.state?.['currency'];
-    console.log(this.documentNumber, this.itemNumber, this.customerId,this.cloudCurrency);
+    console.log(this.documentNumber, this.itemNumber, this.customerId, this.cloudCurrency);
 
   }
   ngOnInit() {
@@ -118,7 +118,8 @@ export class ExecutionOrderComponent {
       this.recordsUnitOfMeasure = response;
     });
     if (this.savedInMemory) {
-      this.mainItemsRecords = [...this._ExecutionOrderService.getMainItems()];
+      //  this.mainItemsRecords = [...this._ExecutionOrderService.getMainItems()];
+      this.mainItemsRecords = [...this.mainItemsRecords];
       console.log(this.mainItemsRecords);
     }
     //localhost:8080/executionordermain/referenceid?referenceId=6&salesOrderItem=10
@@ -164,7 +165,6 @@ export class ExecutionOrderComponent {
   }
   showExcelDialog() {
     this.displayExcelDialog = true;
-
   }
 
   showSalesQuotationDialog() {
@@ -299,15 +299,17 @@ export class ExecutionOrderComponent {
             })
           ) as MainItem;
           console.log(filteredRecord);
-          this._ExecutionOrderService.addMainItem(filteredRecord);
+          // this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.addMainItem(filteredRecord);
+          this.mainItemsRecords = [...this.mainItemsRecords];
           this.savedInMemory = true;
           // this.cdr.detectChanges();
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
+          // const newMainItems = this._ExecutionOrderService.getMainItems();
+          // // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          // this.mainItemsRecords = [
+          //   ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+          //   ...newMainItems
+          // ];
           this.updateTotalValueAfterAction();
           console.log(this.mainItemsRecords);
           this.resetNewMainItem();
@@ -389,15 +391,17 @@ export class ExecutionOrderComponent {
             })
           ) as MainItem;
           console.log(filteredRecord);
-          this._ExecutionOrderService.addMainItem(filteredRecord);
+          // this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.addMainItem(filteredRecord);
+          this.mainItemsRecords = [...this.mainItemsRecords];
           this.savedInMemory = true;
           // this.cdr.detectChanges();
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
+          // const newMainItems = this._ExecutionOrderService.getMainItems();
+          // // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          // this.mainItemsRecords = [
+          //   ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+          //   ...newMainItems
+          // ];
           this.updateTotalValueAfterAction();
           console.log(this.mainItemsRecords);
           this.resetNewMainItem();
@@ -476,15 +480,17 @@ export class ExecutionOrderComponent {
             })
           ) as MainItem;
           console.log(filteredRecord);
-          this._ExecutionOrderService.addMainItem(filteredRecord);
+          // this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.addMainItem(filteredRecord);
+          this.mainItemsRecords = [...this.mainItemsRecords];
           this.savedInMemory = true;
           // this.cdr.detectChanges();
-          const newMainItems = this._ExecutionOrderService.getMainItems();
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
+          // const newMainItems = this._ExecutionOrderService.getMainItems();
+          // // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          // this.mainItemsRecords = [
+          //   ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+          //   ...newMainItems
+          // ];
           this.updateTotalValueAfterAction();
           console.log(this.mainItemsRecords);
           this.resetNewMainItem();
@@ -519,19 +525,19 @@ export class ExecutionOrderComponent {
   onFileSelect(event: any, fileUploader: any) {
 
     console.log('Records before :', this.parsedData);
-    
+
     const file = event.files[0];
     const reader = new FileReader();
-  
+
     reader.onload = (e: any) => {
       const binaryData = e.target.result;
       const workbook = XLSX.read(binaryData, { type: 'binary' });
-  
+
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-  
+
       const jsonData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
       if (jsonData.length > 0) {
         this.displayedColumns = jsonData[0].filter((col: any) => typeof col === 'string' && col.trim() !== '') as string[];
         this.parsedData = jsonData.slice(1).map((row: any[]) => {
@@ -542,24 +548,24 @@ export class ExecutionOrderComponent {
           return rowData;
         });
         console.log('Records :', this.parsedData);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Records copied from the excel sheet successfully!',
-        life: 4000
-      });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Records copied from the excel sheet successfully!',
+          life: 4000
+        });
       } else {
         this.displayedColumns = [];
         this.parsedData = [];
       }
-  
+
       // Reset the file input using the PrimeNG method
       fileUploader.clear();
     };
-  
+
     reader.readAsBinaryString(file);
   }
-  
+
   importSelectedRecords() {
     console.log('Records to Import:', this.parsedData);
     // You can now iterate over the parsed data and copy it to your main table
@@ -570,9 +576,6 @@ export class ExecutionOrderComponent {
     this.displayImportsDialog = false;
     this.displayExcelDialog = false;
   }
-
-
-
   //End Excel Import:
 
 
@@ -734,6 +737,8 @@ export class ExecutionOrderComponent {
             console.log(record);
 
             this.mainItemsRecords = this.mainItemsRecords.filter(item => item.executionOrderMainCode !== record.executionOrderMainCode);
+            this.mainItemsRecords = [...this.mainItemsRecords];
+            console.log('MainItems after deletion:', this.mainItemsRecords);
             this.updateTotalValueAfterAction();
             this.cdr.detectChanges();
             console.log(this.mainItemsRecords);
@@ -744,7 +749,7 @@ export class ExecutionOrderComponent {
             detail: 'Deleted',
             life: 3000,
           });
-          this.selectedExecutionOrder=[];
+          this.selectedExecutionOrder = [];
         }
       });
     }
@@ -787,9 +792,9 @@ export class ExecutionOrderComponent {
 
   addMainItemInMemory() {
 
-    if(this.newMainItem.description =="" && this.newMainItem.totalQuantity ===0 && this.newMainItem.amountPerUnit === 0){
+    if (this.newMainItem.description == "" && this.newMainItem.totalQuantity === 0 && this.newMainItem.amountPerUnit === 0) {
       console.log("hereee");
-      console.log(this.newMainItem.description,this.newMainItem.totalQuantity,this.newMainItem.amountPerUnit)
+      console.log(this.newMainItem.description, this.newMainItem.totalQuantity, this.newMainItem.amountPerUnit)
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -797,7 +802,7 @@ export class ExecutionOrderComponent {
         life: 3000,
       });
     }
-   else if (!this.selectedServiceNumberRecord) { // if user didn't select serviceNumber 
+    else if (!this.selectedServiceNumberRecord) { // if user didn't select serviceNumber 
 
       const newRecord: MainItem = {
         unitOfMeasurementCode: this.selectedUnitOfMeasure,
@@ -868,18 +873,19 @@ export class ExecutionOrderComponent {
           ) as MainItem;
           console.log(filteredRecord);
 
-          this._ExecutionOrderService.addMainItem(filteredRecord);
-
+          // this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.addMainItem(filteredRecord);
+          this.mainItemsRecords = [...this.mainItemsRecords];
           this.savedInMemory = true;
           // this.cdr.detectChanges();
 
-          const newMainItems = this._ExecutionOrderService.getMainItems();
+          // const newMainItems = this._ExecutionOrderService.getMainItems();
 
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
+          // // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          // this.mainItemsRecords = [
+          //   ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+          //   ...newMainItems
+          // ];
           console.log(this.mainItemsRecords);
 
           this.updateTotalValueAfterAction();
@@ -925,7 +931,7 @@ export class ExecutionOrderComponent {
         serviceNumberCode: this.selectedServiceNumber,
         unitOfMeasurementCode: this.selectedServiceNumberRecord?.unitOfMeasurementCode,
         //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,
-        currencyCode:this.cloudCurrency,
+        currencyCode: this.cloudCurrency,
         // this.selectedCurrency,
 
         description: this.selectedServiceNumberRecord?.description,
@@ -992,18 +998,19 @@ export class ExecutionOrderComponent {
           ) as MainItem;
           console.log(filteredRecord);
 
-          this._ExecutionOrderService.addMainItem(filteredRecord);
+          this.addMainItem(filteredRecord);
+          this.mainItemsRecords = [...this.mainItemsRecords];
 
           this.savedInMemory = true;
           //this.cdr.detectChanges();
 
-          const newMainItems = this._ExecutionOrderService.getMainItems();
+          // const newMainItems = this._ExecutionOrderService.getMainItems();
 
-          // Combine the current mainItemsRecords with the new list, ensuring no duplicates
-          this.mainItemsRecords = [
-            ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
-            ...newMainItems
-          ];
+          // // Combine the current mainItemsRecords with the new list, ensuring no duplicates
+          // this.mainItemsRecords = [
+          //   ...this.mainItemsRecords.filter(item => !newMainItems.some(newItem => newItem.executionOrderMainCode === item.executionOrderMainCode)), // Remove existing items
+          //   ...newMainItems
+          // ];
           console.log(this.mainItemsRecords);
 
           this.updateTotalValueAfterAction();
@@ -1374,6 +1381,13 @@ export class ExecutionOrderComponent {
       type: EXCEL_TYPE
     });
     FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
+
+  // Memory Operations:
+  addMainItem(item: MainItem) {
+    item.executionOrderMainCode = this.mainItemsRecords.length + 1;
+    this.mainItemsRecords.push(item);
+    console.log(this.mainItemsRecords);
   }
 
 }
