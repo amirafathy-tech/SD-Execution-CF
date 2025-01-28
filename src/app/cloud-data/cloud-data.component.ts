@@ -44,10 +44,10 @@ export class CloudDataComponent {
       console.log(response);
       console.log(response.d.results);
       //this.documentItems=response.d.results;
-      this.documentItems = response.d.results.sort((a: { SalesQuotationItem: string }, b: { SalesQuotationItem: string }) => {
-        return parseInt(a.SalesQuotationItem, 10) - parseInt(b.SalesQuotationItem, 10);
+      this.documentItems = response.d.results.sort((a: { SalesOrderItem: string }, b: { SalesOrderItem: string }) => {
+        return parseInt(a.SalesOrderItem, 10) - parseInt(b.SalesOrderItem, 10);
       });
-      
+
       console.log(this.documentItems); 
       this.customerId=response.d.SoldToParty;
      });

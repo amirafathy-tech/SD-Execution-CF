@@ -125,7 +125,8 @@ export class ExecutionOrderComponent {
     //localhost:8080/executionordermain/referenceid?referenceId=6&salesOrderItem=10
     this._ApiService.get<MainItem[]>(`executionordermain/referenceid?referenceId=${this.documentNumber}&salesOrderItem=${this.itemNumber}`).subscribe({
       next: (res) => {
-        this.mainItemsRecords = res.sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
+        this.mainItemsRecords = res .map((item, index) => ({ ...item,originalIndex: index + 1 }))
+        .sort((a, b) => a.executionOrderMainCode - b.executionOrderMainCode);
         this.itemText = this.mainItemsRecords[0].salesOrderItemText ? this.mainItemsRecords[0].salesOrderItemText : "";
         console.log(this.itemText);
         console.log(this.mainItemsRecords);
@@ -241,6 +242,7 @@ export class ExecutionOrderComponent {
   saveMainItem(mainItem: MainItemSalesQuotation) {
     console.log(mainItem);
     const newRecord: MainItem = {
+      originalIndex: this.mainItemsRecords.length + 1,
       //
       invoiceMainItemCode: mainItem.invoiceMainItemCode,
       //
@@ -333,6 +335,7 @@ export class ExecutionOrderComponent {
   saveModelSpecsDetails(item: ModelSpecDetails) {
     console.log(item);
     const newRecord: MainItem = {
+      originalIndex: this.mainItemsRecords.length + 1,
       //
       invoiceMainItemCode: item.modelSpecDetailsCode,
       //
@@ -422,6 +425,7 @@ export class ExecutionOrderComponent {
   saveMainItemFromExcel(mainItem: MainItem) {
     console.log(mainItem);
     const newRecord: MainItem = {
+      originalIndex: this.mainItemsRecords.length + 1,
       //
       invoiceMainItemCode: mainItem.invoiceMainItemCode,
       //
@@ -737,6 +741,10 @@ export class ExecutionOrderComponent {
             console.log(record);
 
             this.mainItemsRecords = this.mainItemsRecords.filter(item => item.executionOrderMainCode !== record.executionOrderMainCode);
+              // Reassign originalIndex dynamically
+              this.mainItemsRecords.forEach((item, index) => {
+                item.originalIndex = index + 1; 
+              });
             this.mainItemsRecords = [...this.mainItemsRecords];
             console.log('MainItems after deletion:', this.mainItemsRecords);
             this.updateTotalValueAfterAction();
@@ -805,6 +813,7 @@ export class ExecutionOrderComponent {
     else if (!this.selectedServiceNumberRecord) { // if user didn't select serviceNumber 
 
       const newRecord: MainItem = {
+        originalIndex: this.mainItemsRecords.length + 1,
         unitOfMeasurementCode: this.selectedUnitOfMeasure,
         currencyCode: this.cloudCurrency,
         //this.selectedCurrency,
@@ -928,6 +937,7 @@ export class ExecutionOrderComponent {
 
     else if (this.selectedServiceNumberRecord) { // if user select serviceNumber 
       const newRecord: MainItem = {
+        originalIndex: this.mainItemsRecords.length + 1,
         serviceNumberCode: this.selectedServiceNumber,
         unitOfMeasurementCode: this.selectedServiceNumberRecord?.unitOfMeasurementCode,
         //this.selectedServiceNumberRecord?.baseUnitOfMeasurement,

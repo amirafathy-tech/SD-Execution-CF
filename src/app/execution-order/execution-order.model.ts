@@ -1,5 +1,6 @@
 
 export class MainItem {
+    originalIndex?: number;
 
     Type:string='';
 
